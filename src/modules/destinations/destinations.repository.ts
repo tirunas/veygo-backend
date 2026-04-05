@@ -49,4 +49,28 @@ export class DestinationsRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.destination.delete({ where: { id } });
   }
+
+  async search(
+    q: string | undefined,
+    styles: string[] | undefined,
+  ): Promise<DestinationRecord[]> {
+    const where: Record<string, unknown> = {};
+
+    if (q) {
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { country: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    if (styles?.length) {
+      where.styles = { hasSome: styles };
+    }
+
+    const records = await this.prisma.destination.findMany({
+      where,
+      orderBy: { name: 'asc' },
+    });
+    return records as unknown as DestinationRecord[];
+  }
 }
