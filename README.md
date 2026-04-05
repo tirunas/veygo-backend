@@ -1,98 +1,97 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Veygo — Travel Planner
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Veygo is a premium travel planning platform built for Lithuanian travelers. Users explore destinations, build personalized multi-day itineraries, pick flights and hotels, and get a day-by-day plan — all in one flow.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Repository Structure
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+```
+traveling/
+├── veygo-next/      # Frontend — Next.js 16 + React + TypeScript + Tailwind CSS v4
+└── veygo-backend/   # Backend — NestJS + Prisma + PostgreSQL + Redis
 ```
 
-## Compile and run the project
+## Tech Stack
+
+**Frontend (`veygo-next/`)**
+- Next.js 16 (App Router, SSR/SSG)
+- React 19 + TypeScript 5 (strict)
+- Tailwind CSS v4 with custom Veygo design tokens
+- shadcn/ui (Radix UI primitives)
+- MapLibre GL + react-map-gl + supercluster
+
+**Backend (`veygo-backend/`)**
+- NestJS + TypeScript
+- Prisma ORM + PostgreSQL
+- Redis (session/cache)
+- Winston structured logging
+- Docker Compose for local infra
+
+## Getting Started
+
+### Frontend
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cd veygo-next
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-## Run tests
+No `.env` required — all data is static (mock). Map tiles use public CartoDB CDN (no API key needed).
+
+### Backend
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd veygo-backend
+docker-compose up -d   # Start Postgres + Redis
+npm install
+npm run start:dev      # http://localhost:3001
 ```
 
-## Deployment
+Copy `.env.example` to `.env` and fill in database credentials before starting.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Key Features
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- **18 destinations** with attractions, food, hotels, and pricing
+- **12 multi-day routes** with full itineraries
+- **3 ready-made plans** for quick booking
+- **Plan builder** — flights, hotels, day-by-day timeline, interactive map
+- **Payment flow** — users pay per destination to unlock the plan builder
+- **Promo codes** — `VEYGO10` (10%), `PIRMA` (20%), `DRAUGAI` (15%)
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+## Scripts
+
+| Location | Command | Description |
+|----------|---------|-------------|
+| `veygo-next/` | `npm run dev` | Dev server |
+| `veygo-next/` | `npm run build` | Production build |
+| `veygo-next/` | `npm run lint` | ESLint |
+| `veygo-next/` | `npm run format` | Prettier |
+| `veygo-backend/` | `npm run start:dev` | Dev server with hot reload |
+| `veygo-backend/` | `npm run test` | Unit tests |
+| `veygo-backend/` | `npm run build` | Production build |
+
+## Routes
+
+| Route | Description |
+|-------|-------------|
+| `/` | Home — hero, destinations, ready plans, testimonials |
+| `/discover` | Filter + search destinations and routes |
+| `/destination/[id]` | Attractions, food, itinerary, pricing |
+| `/plan/[id]` | Plan builder — flights, hotels, timeline |
+| `/ready-plan/[id]` | Pre-configured itinerary + checkout |
+| `/route/[id]` | Multi-stop itinerary |
+| `/patirtys` | Experiences |
+| `/mano-planai` | Saved plans |
+
+## Architecture
+
+The frontend follows Domain-Driven Design:
+
+```
+veygo-next/src/
+├── app/        # Next.js routes (thin shell)
+├── domains/    # Feature domains (plan, destination, discover, route, home…)
+└── shared/     # Cross-domain: ui, layout, map, hooks, lib, services, data
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Domain components only import from `shared/`. No cross-domain imports.
