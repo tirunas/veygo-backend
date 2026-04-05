@@ -29,6 +29,17 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum AttractionCategory {
+  popular
+  gem
+}
+
+enum HotelTier {
+  budget
+  mid
+  comfort
+}
+
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
@@ -119,8 +130,111 @@ model Destination {
   heroImageUrl   String
   currentWeather String   @default("")
   content        Json
+  lat            Float?
+  lng            Float?
+  radiusKm       Float    @default(25)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  destinationAttractions DestinationAttraction[]
+  destinationRestaurants DestinationRestaurant[]
+  destinationHotels      DestinationHotel[]
+
   @@index([name])
+}
+
+model Attraction {
+  id               String             @id
+  name             String
+  lat              Float
+  lng              Float
+  category         AttractionCategory
+  description      String
+  img              String
+  priceAndDuration String?
+  openingHours     String?
+  bestTime         String?
+  source           String?
+  content          Json               @default("{}")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  destinations DestinationAttraction[]
+
+  @@index([lat, lng])
+}
+
+model Restaurant {
+  id           String   @id
+  name         String
+  lat          Float
+  lng          Float
+  type         String
+  cuisine      String?
+  price        String
+  openingHours String?
+  delivery     Boolean  @default(false)
+  petFriendly  Boolean  @default(false)
+  img          String?
+  source       String?
+  content      Json     @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  destinations DestinationRestaurant[]
+
+  @@index([lat, lng])
+}
+
+model Hotel {
+  id            String    @id
+  name          String
+  lat           Float
+  lng           Float
+  tier          HotelTier
+  area          String
+  pricePerNight Int
+  rating        String
+  img           String
+  source        String?
+  content       Json      @default("{}")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  destinations DestinationHotel[]
+
+  @@index([lat, lng])
+}
+
+model DestinationAttraction {
+  destinationId String
+  attractionId  String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  attraction    Attraction  @relation(fields: [attractionId], references: [id], onDelete: Cascade)
+
+  @@id([destinationId, attractionId])
+  @@index([destinationId])
+  @@index([attractionId])
+}
+
+model DestinationRestaurant {
+  destinationId String
+  restaurantId  String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@id([destinationId, restaurantId])
+  @@index([destinationId])
+  @@index([restaurantId])
+}
+
+model DestinationHotel {
+  destinationId String
+  hotelId       String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  hotel         Hotel       @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  @@id([destinationId, hotelId])
+  @@index([destinationId])
+  @@index([hotelId])
 }
