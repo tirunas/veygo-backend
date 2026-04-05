@@ -36,6 +36,7 @@ export interface DestinationContent {
   mapData?: MapData;
   startingPrice?: number;
   flightHours?: number;
+  minDailyBudget?: number;
   itinerary?: ItineraryItem[];
 }
 
@@ -92,4 +93,18 @@ export interface UpdateDestinationInput {
   heroImageUrl?: string;
   content?: DestinationContent;
   currentWeather?: string;
+}
+
+export interface DestinationSearchResult {
+  id: string;
+  name: string;
+  country: string;
+  styles: string[];
+  bestSeason: string;
+  imgUrl: string;
+  heroImageUrl: string;
+  currentWeather: string;
+  minDailyBudget: number;
+  flightHours: number;
+  startingPrice: number;
 }
