@@ -23,3 +23,15 @@ export const PRICE_TTL = 1800;
 
 export const WEATHER_KEY = (id: string): string => `weather:${id}`;
 export const WEATHER_TTL = 1800;
+
+export const POI_ATTRACTIONS_KEY = (destinationId: string): string =>
+  `poi:${destinationId}:attractions`;
+export const POI_ATTRACTIONS_TTL = 604800; // 7 days
+
+export const POI_RESTAURANTS_KEY = (destinationId: string): string =>
+  `poi:${destinationId}:restaurants`;
+export const POI_RESTAURANTS_TTL = 604800;
+
+export const POI_HOTELS_KEY = (destinationId: string): string =>
+  `poi:${destinationId}:hotels`;
+export const POI_HOTELS_TTL = 604800;
