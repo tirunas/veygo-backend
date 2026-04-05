@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PlanStatus {
+  DRAFT
+  PAID
+  COMPLETE
+}
+
+enum PaymentProvider {
+  MONTONIO
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  role          Role           @default(USER)
+  loginAttempts Int            @default(0)
+  lockedUntil   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  refreshTokens RefreshToken[]
+  userPlans     UserPlan[]
+  purchases     Purchase[]
+  auditLogs     AuditLog[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  family    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([family])
+}
+
+model UserPlan {
+  id            String     @id @default(uuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destinationId String
+  status        PlanStatus @default(DRAFT)
+  customData    Json       @default("{}")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  purchases     Purchase[]
+
+  @@index([userId])
+  @@index([destinationId])
+}
+
+model Purchase {
+  id          String          @id @default(uuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  userPlanId  String
+  userPlan    UserPlan        @relation(fields: [userPlanId], references: [id])
+  provider    PaymentProvider
+  providerRef String
+  amount      Int
+  currency    String          @default("EUR")
+  status      PaymentStatus   @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime        @default(now())
+
+  @@index([userId])
+  @@index([providerRef])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  event     String
+  ip        String
+  userAgent String
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([event])
+  @@index([createdAt])
+}
+
+model Destination {
+  id             String   @id
+  name           String
+  country        String
+  styles         String[]
+  bestSeason     String
+  imgUrl         String
+  heroImageUrl   String
+  currentWeather String   @default("")
+  content        Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([name])
+}
