@@ -93,6 +93,9 @@ export interface UpdateDestinationInput {
   heroImageUrl?: string;
   content?: DestinationContent;
   currentWeather?: string;
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
 }
 
 export interface DestinationSearchResult {

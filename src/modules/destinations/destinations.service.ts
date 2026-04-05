@@ -23,12 +23,17 @@ import {
   DEST_FOOD_TTL,
   DEST_MAP_KEY,
   DEST_MAP_TTL,
+  POI_ATTRACTIONS_KEY,
+  POI_RESTAURANTS_KEY,
+  POI_HOTELS_KEY,
 } from '../../cache/cache.constants';
+import { GeoMatchingService } from '../geo-matching/geo-matching.service';
 
 @Injectable()
 export class DestinationsService {
   constructor(
     private readonly destinationsRepository: DestinationsRepository,
+    private readonly geoMatchingService: GeoMatchingService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -74,6 +79,17 @@ export class DestinationsService {
     const record = await this.destinationsRepository.update(id, input);
     await this.cacheManager.del(DEST_LIST_KEY);
     await this.cacheManager.del(DEST_CONTENT_KEY(id));
+
+    const geoChanged = input.lat !== undefined || input.lng !== undefined || input.radiusKm !== undefined;
+    if (geoChanged) {
+      await this.geoMatchingService.recomputeForDestination(id);
+      await Promise.all([
+        this.cacheManager.del(POI_ATTRACTIONS_KEY(id)),
+        this.cacheManager.del(POI_RESTAURANTS_KEY(id)),
+        this.cacheManager.del(POI_HOTELS_KEY(id)),
+      ]);
+    }
+
     return record;
   }
 

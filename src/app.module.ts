@@ -7,6 +7,7 @@ import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DestinationsModule } from './modules/destinations/destinations.module';
+import { GeoMatchingModule } from './modules/geo-matching/geo-matching.module';
 import { PricingModule } from './modules/pricing/pricing.module';
 import { SearchModule } from './modules/search/search.module';
 import { JobsModule } from './modules/jobs/jobs.module';
@@ -49,6 +50,7 @@ import * as winston from 'winston';
     HealthModule,
     AuthModule,
     DestinationsModule,
+    GeoMatchingModule,
     PricingModule,
     SearchModule,
     JobsModule,
