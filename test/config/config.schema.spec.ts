@@ -22,6 +22,8 @@ describe('configSchema', () => {
       MONTONIO_BASE_URL: 'https://sandbox-merchant.montonio.com',
       STRIPE_SECRET_KEY: 'sk_test_placeholder',
       STRIPE_WEBHOOK_SECRET: 'whsec_placeholder',
+      SMTP_HOST: 'localhost',
+      SMTP_FROM: 'noreply@veygo.dev',
     });
     expect(error).toBeUndefined();
   });

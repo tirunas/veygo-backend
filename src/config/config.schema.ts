@@ -15,6 +15,9 @@ export const configSchema = Joi.object({
   THROTTLE_LIMIT: Joi.number().default(200),
   APP_URL: Joi.string().uri().required(),
   CORS_ORIGINS: Joi.string().required(),
+  SMTP_HOST: Joi.string().required(),
+  SMTP_PORT: Joi.number().default(1025),
+  SMTP_FROM: Joi.string().email().required(),
   MONTONIO_ACCESS_KEY: Joi.string().required(),
   MONTONIO_SECRET_KEY: Joi.string().required(),
   MONTONIO_BASE_URL: Joi.string()

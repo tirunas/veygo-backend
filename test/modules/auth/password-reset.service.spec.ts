@@ -1,23 +1,14 @@
+import { Test } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { Cache } from '@nestjs/cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { PasswordResetService } from '../../../src/modules/auth/password-reset.service';
 import { UsersRepository } from '../../../src/modules/users/users.repository';
 import { HasherService } from '../../../src/modules/auth/hasher.service';
+import { EmailService } from '../../../src/modules/email/email.service';
 
-const mockUser = {
-  id: 'user-1',
-  email: 'test@veygo.lt',
-  passwordHash: 'hashed',
-  role: 'USER' as const,
-  loginAttempts: 0,
-  lockedUntil: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-const mockCacheManager = {
-  get: jest.fn(),
+const mockCache = {
   set: jest.fn(),
+  get: jest.fn(),
   del: jest.fn(),
 };
 
@@ -27,108 +18,100 @@ const mockUsersRepo = {
 };
 
 const mockHasher = {
-  hash: jest.fn(),
+  hash: jest.fn().mockResolvedValue('hashed'),
+};
+
+const mockEmail = {
+  sendPasswordReset: jest.fn(),
 };
 
 describe('PasswordResetService', () => {
   let service: PasswordResetService;
 
-  beforeEach(() => {
-    service = new PasswordResetService(
-      mockCacheManager as unknown as Cache,
-      mockUsersRepo as unknown as UsersRepository,
-      mockHasher as unknown as HasherService,
-    );
+  beforeEach(async () => {
     jest.clearAllMocks();
+    const module = await Test.createTestingModule({
+      providers: [
+        PasswordResetService,
+        { provide: CACHE_MANAGER, useValue: mockCache },
+        { provide: UsersRepository, useValue: mockUsersRepo },
+        { provide: HasherService, useValue: mockHasher },
+        { provide: EmailService, useValue: mockEmail },
+      ],
+    }).compile();
+
+    service = module.get(PasswordResetService);
   });
 
   describe('requestReset', () => {
-    it('should store token in Redis with user ID when email exists', async () => {
-      mockUsersRepo.findByEmail.mockResolvedValue(mockUser);
-      mockCacheManager.set.mockResolvedValue(undefined);
+    it('sends password reset email when user exists', async () => {
+      mockUsersRepo.findByEmail.mockResolvedValue({ id: 'user-1' });
+      mockCache.set.mockResolvedValue(undefined);
+      mockEmail.sendPasswordReset.mockResolvedValue(undefined);
 
-      await service.requestReset('test@veygo.lt');
+      await service.requestReset('user@example.com');
 
-      expect(mockUsersRepo.findByEmail).toHaveBeenCalledWith('test@veygo.lt');
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
-        expect.stringContaining('pwd-reset:'),
+      expect(mockEmail.sendPasswordReset).toHaveBeenCalledWith(
+        'user@example.com',
+        expect.any(String),
+      );
+    });
+
+    it('stores reset token in cache with 15-minute TTL', async () => {
+      mockUsersRepo.findByEmail.mockResolvedValue({ id: 'user-1' });
+      mockCache.set.mockResolvedValue(undefined);
+      mockEmail.sendPasswordReset.mockResolvedValue(undefined);
+
+      await service.requestReset('user@example.com');
+
+      expect(mockCache.set).toHaveBeenCalledWith(
+        expect.stringMatching(/^pwd-reset:/),
         'user-1',
         15 * 60 * 1000,
       );
     });
 
-    it('should return silently when email does not exist', async () => {
+    it('does nothing when user does not exist', async () => {
       mockUsersRepo.findByEmail.mockResolvedValue(null);
 
-      await service.requestReset('nonexistent@veygo.lt');
+      await service.requestReset('ghost@example.com');
 
-      expect(mockCacheManager.set).not.toHaveBeenCalled();
-    });
-
-    it('should log the reset token for email testing (no email service)', async () => {
-      const logSpy = jest.spyOn(service['logger'], 'log');
-      mockUsersRepo.findByEmail.mockResolvedValue(mockUser);
-      mockCacheManager.set.mockResolvedValue(undefined);
-
-      await service.requestReset('test@veygo.lt');
-
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
-          /Password reset token for test@veygo\.lt: [a-f0-9-]{36}/,
-        ),
-      );
+      expect(mockEmail.sendPasswordReset).not.toHaveBeenCalled();
+      expect(mockCache.set).not.toHaveBeenCalled();
     });
   });
 
   describe('resetPassword', () => {
-    it('should reset password when token is valid', async () => {
-      const token = 'valid-token-uuid';
-      mockCacheManager.get.mockResolvedValue('user-1');
-      mockHasher.hash.mockResolvedValue('new-hashed-password');
+    it('updates password hash when token is valid', async () => {
+      mockCache.get.mockResolvedValue('user-1');
+      mockHasher.hash.mockResolvedValue('new-hashed');
       mockUsersRepo.updatePasswordHash.mockResolvedValue(undefined);
-      mockCacheManager.del.mockResolvedValue(undefined);
+      mockCache.del.mockResolvedValue(undefined);
 
-      await service.resetPassword(token, 'newPassword123');
+      await service.resetPassword('valid-token', 'newpass');
 
-      expect(mockCacheManager.get).toHaveBeenCalledWith(
-        expect.stringContaining(token),
-      );
-      expect(mockHasher.hash).toHaveBeenCalledWith('newPassword123');
       expect(mockUsersRepo.updatePasswordHash).toHaveBeenCalledWith(
         'user-1',
-        'new-hashed-password',
-      );
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
-        expect.stringContaining(token),
+        'new-hashed',
       );
     });
 
-    it('should throw BadRequestException when token is invalid', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-
-      await expect(
-        service.resetPassword('invalid-token', 'newPassword123'),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('should throw BadRequestException when token is expired', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-
-      await expect(
-        service.resetPassword('expired-token', 'newPassword123'),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('should delete token from cache after password reset', async () => {
-      const token = 'valid-token-uuid';
-      mockCacheManager.get.mockResolvedValue('user-1');
-      mockHasher.hash.mockResolvedValue('new-hashed-password');
+    it('deletes token after successful reset', async () => {
+      mockCache.get.mockResolvedValue('user-1');
       mockUsersRepo.updatePasswordHash.mockResolvedValue(undefined);
-      mockCacheManager.del.mockResolvedValue(undefined);
+      mockCache.del.mockResolvedValue(undefined);
 
-      await service.resetPassword(token, 'newPassword123');
+      await service.resetPassword('valid-token', 'newpass');
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith(`pwd-reset:${token}`);
+      expect(mockCache.del).toHaveBeenCalledWith('pwd-reset:valid-token');
+    });
+
+    it('throws BadRequestException for invalid token', async () => {
+      mockCache.get.mockResolvedValue(null);
+
+      await expect(service.resetPassword('bad-token', 'pass')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

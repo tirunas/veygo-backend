@@ -2,24 +2,23 @@ import {
   Injectable,
   Inject,
   BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { randomUUID } from 'crypto';
 import { UsersRepository } from '../users/users.repository';
 import { HasherService } from './hasher.service';
+import { EmailService } from '../email/email.service';
 
 const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
 const RESET_TOKEN_PREFIX = 'pwd-reset:';
 
 @Injectable()
 export class PasswordResetService {
-  private readonly logger = new Logger(PasswordResetService.name);
-
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly usersRepository: UsersRepository,
     private readonly hasherService: HasherService,
+    private readonly emailService: EmailService,
   ) {}
 
   async requestReset(email: string): Promise<void> {
@@ -33,7 +32,7 @@ export class PasswordResetService {
       user.id,
       RESET_TOKEN_TTL_MS,
     );
-    this.logger.log(`Password reset token for ${email}: ${token}`);
+    await this.emailService.sendPasswordReset(email, token);
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
