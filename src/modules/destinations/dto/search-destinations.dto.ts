@@ -1,32 +1,12 @@
-import { IsOptional, IsString, IsNumber, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { z } from 'zod';
 
-export class SearchDestinationsDto {
-  @IsOptional()
-  @IsString()
-  q?: string;
+export const searchDestinationsSchema = z.object({
+  q: z.string().optional(),
+  styles: z.string().optional(), // comma-separated: "culture,food"
+  maxBudget: z.coerce.number().min(0).optional(),
+  maxFlightH: z.coerce.number().min(0).optional(),
+  months: z.string().optional(), // comma-separated Lithuanian month names: "Sausis,Vasaris"
+  weather: z.enum(['warm', 'cool']).optional(),
+});
 
-  @IsOptional()
-  @IsString()
-  styles?: string; // comma-separated: "culture,food"
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Type(() => Number)
-  maxBudget?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Type(() => Number)
-  maxFlightH?: number;
-
-  @IsOptional()
-  @IsString()
-  months?: string; // comma-separated Lithuanian month names: "Sausis,Vasaris"
-
-  @IsOptional()
-  @IsString()
-  weather?: string; // "warm" | "cool"
-}
+export type SearchDestinationsDto = z.infer<typeof searchDestinationsSchema>;
