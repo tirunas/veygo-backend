@@ -1,331 +1,429 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, AttractionCategory, HotelTier } from '@prisma/client';
+import { haversineDistanceKm } from '../src/modules/geo-matching/haversine';
 
 const prisma = new PrismaClient();
 
-interface SeedDestination {
-  id: string;
-  name: string;
-  country: string;
-  styles: string[];
-  bestSeason: string;
-  imgUrl: string;
-  heroImageUrl: string;
-  currentWeather: string;
-  content: Record<string, unknown>;
-}
+// ─── Destinations ─────────────────────────────────────────────────────────────
 
-const destinations: SeedDestination[] = [
+const destinations = [
   {
-    id: 'barcelona',
-    name: 'Barselona',
-    country: 'Ispanija',
-    styles: ['culture', 'food', 'city', 'beach'],
-    bestSeason: 'Balandis – Birželis',
+    id: 'barcelona', name: 'Barselona', country: 'Ispanija',
+    styles: ['culture', 'food', 'city', 'beach'], bestSeason: 'Balandis – Birželis',
     imgUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1920&q=85',
-    currentWeather: '22°C',
-    content: {
-      description: 'Katalonijos sostinė — miestas su unikaliu charakteriu.',
-      highlights: ['Sagrada Familia', 'Park Güell', 'La Boqueria', 'Gotikinis kvartalas'],
-      flightHours: 3.5,
-      minDailyBudget: 60,
-      startingPrice: 1230,
-    },
+    currentWeather: '22°C', lat: 41.3851, lng: 2.1734, radiusKm: 25,
+    content: { description: 'Katalonijos sostinė — miestas su unikaliu charakteriu.', highlights: ['Sagrada Familia', 'Park Güell', 'La Boqueria', 'Gotikinis kvartalas'], flightHours: 3.5, minDailyBudget: 60, startingPrice: 1230 },
   },
   {
-    id: 'lisbon',
-    name: 'Lisabona',
-    country: 'Portugalija',
-    styles: ['culture', 'city', 'food'],
-    bestSeason: 'Kovas – Gegužė',
+    id: 'lisbon', name: 'Lisabona', country: 'Portugalija',
+    styles: ['culture', 'city', 'food'], bestSeason: 'Kovas – Gegužė',
     imgUrl: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=1920&q=85',
-    currentWeather: '18°C',
-    content: {
-      description: 'Europos seniausias sostinių miestas ant septynių kalvų.',
-      highlights: ['Alfama', 'Belėmo bokštas', 'Jerónimos vienuolynas', 'LX Factory'],
-      flightHours: 4,
-      minDailyBudget: 50,
-      startingPrice: 980,
-    },
+    currentWeather: '18°C', lat: 38.7169, lng: -9.1395, radiusKm: 20,
+    content: { description: 'Europos seniausias sostinių miestas ant septynių kalvų.', highlights: ['Alfama', 'Belėmo bokštas', 'Jerónimos vienuolynas', 'LX Factory'], flightHours: 4, minDailyBudget: 50, startingPrice: 980 },
   },
   {
-    id: 'kyoto',
-    name: 'Kiotas',
-    country: 'Japonija',
-    styles: ['culture', 'nature', 'history'],
-    bestSeason: 'Kovas – Gegužė',
+    id: 'kyoto', name: 'Kiotas', country: 'Japonija',
+    styles: ['culture', 'nature', 'history'], bestSeason: 'Kovas – Gegužė',
     imgUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1920&q=85',
-    currentWeather: '16°C',
-    content: {
-      description: 'Senoji Japonijos sostinė, tūkstančio šventyklų miestas.',
-      highlights: ['Fushimi Inari', 'Arašijama bambukų miškas', 'Kinkaku-ji', 'Gion kvartalas'],
-      flightHours: 11,
-      minDailyBudget: 70,
-      startingPrice: 2100,
-    },
+    currentWeather: '16°C', lat: 35.0116, lng: 135.7681, radiusKm: 15,
+    content: { description: 'Senoji Japonijos sostinė, tūkstančio šventyklų miestas.', highlights: ['Fushimi Inari', 'Arašijama bambukų miškas', 'Kinkaku-ji', 'Gion kvartalas'], flightHours: 11, minDailyBudget: 70, startingPrice: 2100 },
   },
   {
-    id: 'marrakech',
-    name: 'Marakesas',
-    country: 'Marokas',
-    styles: ['culture', 'food', 'history'],
-    bestSeason: 'Spalis – Lapkritis',
+    id: 'marrakech', name: 'Marakesas', country: 'Marokas',
+    styles: ['culture', 'food', 'history'], bestSeason: 'Spalis – Lapkritis',
     imgUrl: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1920&q=85',
-    currentWeather: '28°C',
-    content: {
-      description: 'Raudonasis miestas — spalvų, kvapų ir garsų simfonija.',
-      highlights: ['Djemaa el-Fna', 'Medina', 'Majorelle sodas', 'Soukų turgus'],
-      flightHours: 5,
-      minDailyBudget: 40,
-      startingPrice: 890,
-    },
+    currentWeather: '28°C', lat: 31.6295, lng: -7.9811, radiusKm: 20,
+    content: { description: 'Raudonasis miestas — spalvų, kvapų ir garsų simfonija.', highlights: ['Djemaa el-Fna', 'Medina', 'Majorelle sodas', 'Soukų turgus'], flightHours: 5, minDailyBudget: 40, startingPrice: 890 },
   },
   {
-    id: 'porto',
-    name: 'Portas',
-    country: 'Portugalija',
-    styles: ['culture', 'food', 'city'],
-    bestSeason: 'Gegužė – Rugsėjis',
+    id: 'porto', name: 'Portas', country: 'Portugalija',
+    styles: ['culture', 'food', 'city'], bestSeason: 'Gegužė – Rugsėjis',
     imgUrl: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=1920&q=85',
-    currentWeather: '17°C',
-    content: {
-      description: 'Azulejo plytelių miestas prie Douro upės.',
-      highlights: ['Ribeira', 'Dom Luís tiltas', 'Porto vinai', 'Livraria Lello'],
-      flightHours: 4,
-      minDailyBudget: 45,
-      startingPrice: 920,
-    },
+    currentWeather: '17°C', lat: 41.1579, lng: -8.6291, radiusKm: 20,
+    content: { description: 'Azulejo plytelių miestas prie Douro upės.', highlights: ['Ribeira', 'Dom Luís tiltas', 'Porto vinai', 'Livraria Lello'], flightHours: 4, minDailyBudget: 45, startingPrice: 920 },
   },
   {
-    id: 'dubrovnik',
-    name: 'Dubrovnikas',
-    country: 'Kroatija',
-    styles: ['beach', 'history', 'culture'],
-    bestSeason: 'Birželis – Rugpjūtis',
+    id: 'dubrovnik', name: 'Dubrovnikas', country: 'Kroatija',
+    styles: ['beach', 'history', 'culture'], bestSeason: 'Birželis – Rugpjūtis',
     imgUrl: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=1920&q=85',
-    currentWeather: '24°C',
-    content: {
-      description: 'Adrijos jūros perlas — Senasis miestas su galingomis sienomis.',
-      highlights: ['Senojo miesto sienos', 'Stradun gatvė', 'Lokrum sala', 'Žygis kalnais'],
-      flightHours: 2.5,
-      minDailyBudget: 70,
-      startingPrice: 1350,
-    },
+    currentWeather: '24°C', lat: 42.6507, lng: 18.0944, radiusKm: 15,
+    content: { description: 'Adrijos jūros perlas — Senasis miestas su galingomis sienomis.', highlights: ['Senojo miesto sienos', 'Stradun gatvė', 'Lokrum sala', 'Žygis kalnais'], flightHours: 2.5, minDailyBudget: 70, startingPrice: 1350 },
   },
   {
-    id: 'rome',
-    name: 'Roma',
-    country: 'Italija',
-    styles: ['culture', 'history', 'food'],
-    bestSeason: 'Balandis – Birželis',
+    id: 'rome', name: 'Roma', country: 'Italija',
+    styles: ['culture', 'history', 'food'], bestSeason: 'Balandis – Birželis',
     imgUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=1920&q=85',
-    currentWeather: '20°C',
-    content: {
-      description: 'Amžinasis miestas — du tūkstančiai metų istorijos kiekvienoje gatvėje.',
-      highlights: ['Koliziejus', 'Vatikanas', 'Trevi fontanas', 'Forumas'],
-      flightHours: 3,
-      minDailyBudget: 65,
-      startingPrice: 1150,
-    },
+    currentWeather: '20°C', lat: 41.9028, lng: 12.4964, radiusKm: 20,
+    content: { description: 'Amžinasis miestas — du tūkstančiai metų istorijos kiekvienoje gatvėje.', highlights: ['Koliziejus', 'Vatikanas', 'Trevi fontanas', 'Forumas'], flightHours: 3, minDailyBudget: 65, startingPrice: 1150 },
   },
   {
-    id: 'paris',
-    name: 'Paryžius',
-    country: 'Prancūzija',
-    styles: ['culture', 'food', 'city', 'history'],
-    bestSeason: 'Balandis – Birželis',
+    id: 'paris', name: 'Paryžius', country: 'Prancūzija',
+    styles: ['culture', 'food', 'city', 'history'], bestSeason: 'Balandis – Birželis',
     imgUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1920&q=85',
-    currentWeather: '15°C',
-    content: {
-      description: 'Šviesos miestas — meno, mados ir gastronomijos sostinė.',
-      highlights: ['Eifelio bokštas', 'Luvras', 'Monmarras', 'Notre-Dame'],
-      flightHours: 3,
-      minDailyBudget: 80,
-      startingPrice: 1280,
-    },
+    currentWeather: '15°C', lat: 48.8566, lng: 2.3522, radiusKm: 25,
+    content: { description: 'Šviesos miestas — meno, mados ir gastronomijos sostinė.', highlights: ['Eifelio bokštas', 'Luvras', 'Monmarras', 'Notre-Dame'], flightHours: 3, minDailyBudget: 80, startingPrice: 1280 },
   },
   {
-    id: 'amsterdam',
-    name: 'Amsterdamas',
-    country: 'Nyderlandai',
-    styles: ['culture', 'city', 'history'],
-    bestSeason: 'Balandis – Gegužė',
+    id: 'amsterdam', name: 'Amsterdamas', country: 'Nyderlandai',
+    styles: ['culture', 'city', 'history'], bestSeason: 'Balandis – Gegužė',
     imgUrl: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=1920&q=85',
-    currentWeather: '12°C',
-    content: {
-      description: 'Kanalų miestas — dviračiai, muziejai ir tulpių laukai.',
-      highlights: ['Rijksmuseum', 'Ano Frank namai', 'Kanalai', 'Keukenhof tulpės'],
-      flightHours: 2.5,
-      minDailyBudget: 75,
-      startingPrice: 1180,
-    },
+    currentWeather: '12°C', lat: 52.3676, lng: 4.9041, radiusKm: 15,
+    content: { description: 'Kanalų miestas — dviračiai, muziejai ir tulpių laukai.', highlights: ['Rijksmuseum', 'Ano Frank namai', 'Kanalai', 'Keukenhof tulpės'], flightHours: 2.5, minDailyBudget: 75, startingPrice: 1180 },
   },
   {
-    id: 'prague',
-    name: 'Praga',
-    country: 'Čekija',
-    styles: ['culture', 'history', 'city'],
-    bestSeason: 'Gegužė – Rugsėjis',
+    id: 'prague', name: 'Praga', country: 'Čekija',
+    styles: ['culture', 'history', 'city'], bestSeason: 'Gegužė – Rugsėjis',
     imgUrl: 'https://images.unsplash.com/photo-1513805959324-96eb66ca8713?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=1920&q=85',
-    currentWeather: '13°C',
-    content: {
-      description: 'Šimtų bokštų miestas — viduramžių architektūros šedevras.',
-      highlights: ['Senamiesčio aikštė', 'Prahos pilis', 'Karlov tiltas', 'Josefov kvartalas'],
-      flightHours: 2,
-      minDailyBudget: 45,
-      startingPrice: 850,
-    },
+    currentWeather: '13°C', lat: 50.0755, lng: 14.4378, radiusKm: 20,
+    content: { description: 'Šimtų bokštų miestas — viduramžių architektūros šedevras.', highlights: ['Senamiesčio aikštė', 'Prahos pilis', 'Karlov tiltas', 'Josefov kvartalas'], flightHours: 2, minDailyBudget: 45, startingPrice: 850 },
   },
   {
-    id: 'athens',
-    name: 'Atėnai',
-    country: 'Graikija',
-    styles: ['culture', 'history', 'food'],
-    bestSeason: 'Balandis – Birželis',
+    id: 'athens', name: 'Atėnai', country: 'Graikija',
+    styles: ['culture', 'history', 'food'], bestSeason: 'Balandis – Birželis',
     imgUrl: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=1920&q=85',
-    currentWeather: '22°C',
-    content: {
-      description: 'Demokratijos lopšys — du su puse tūkstančio metų istorija.',
-      highlights: ['Akropolis', 'Partenonas', 'Plaka kvartalas', 'Nacionalinis muziejus'],
-      flightHours: 3.5,
-      minDailyBudget: 55,
-      startingPrice: 1050,
-    },
+    currentWeather: '22°C', lat: 37.9838, lng: 23.7275, radiusKm: 20,
+    content: { description: 'Demokratijos lopšys — du su puse tūkstančio metų istorija.', highlights: ['Akropolis', 'Partenonas', 'Plaka kvartalas', 'Nacionalinis muziejus'], flightHours: 3.5, minDailyBudget: 55, startingPrice: 1050 },
   },
   {
-    id: 'budapest',
-    name: 'Budapeštas',
-    country: 'Vengrija',
-    styles: ['culture', 'history', 'city'],
-    bestSeason: 'Balandis – Birželis',
+    id: 'budapest', name: 'Budapeštas', country: 'Vengrija',
+    styles: ['culture', 'history', 'city'], bestSeason: 'Balandis – Birželis',
     imgUrl: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=1920&q=85',
-    currentWeather: '14°C',
-    content: {
-      description: 'Dunojaus perlai — Budas ir Peštas, sujungti tilto.',
-      highlights: ['Parlamento rūmai', 'Termaliniai vonios', 'Žvejų bastionas', 'Ruin bariai'],
-      flightHours: 2,
-      minDailyBudget: 45,
-      startingPrice: 880,
-    },
+    currentWeather: '14°C', lat: 47.4979, lng: 19.0402, radiusKm: 20,
+    content: { description: 'Dunojaus perlai — Budas ir Peštas, sujungti tilto.', highlights: ['Parlamento rūmai', 'Termaliniai vonios', 'Žvejų bastionas', 'Ruin bariai'], flightHours: 2, minDailyBudget: 45, startingPrice: 880 },
   },
   {
-    id: 'tenerife',
-    name: 'Tenerifė',
-    country: 'Ispanija',
-    styles: ['beach', 'nature', 'city'],
-    bestSeason: 'Lapkritis – Kovas',
+    id: 'tenerife', name: 'Tenerifė', country: 'Ispanija',
+    styles: ['beach', 'nature', 'city'], bestSeason: 'Lapkritis – Kovas',
     imgUrl: 'https://images.unsplash.com/photo-1512253037373-90bdc4c43a8b?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1512253037373-90bdc4c43a8b?w=1920&q=85',
-    currentWeather: '25°C',
-    content: {
-      description: 'Amžinojo pavasario sala — Teide ugnikalnio šešėlyje.',
-      highlights: ['Teide nacionalinis parkas', 'Los Gigantes uolos', 'Anaga miškas', 'Santa Cruz karnavalai'],
-      flightHours: 5,
-      minDailyBudget: 60,
-      startingPrice: 1100,
-    },
+    currentWeather: '25°C', lat: 28.2916, lng: -16.6291, radiusKm: 40,
+    content: { description: 'Amžinojo pavasario sala — Teide ugnikalnio šešėlyje.', highlights: ['Teide nacionalinis parkas', 'Los Gigantes uolos', 'Anaga miškas', 'Santa Cruz karnavalai'], flightHours: 5, minDailyBudget: 60, startingPrice: 1100 },
   },
   {
-    id: 'santorini',
-    name: 'Santorinis',
-    country: 'Graikija',
-    styles: ['beach', 'culture', 'romantic'],
-    bestSeason: 'Gegužė – Rugsėjis',
+    id: 'santorini', name: 'Santorinis', country: 'Graikija',
+    styles: ['beach', 'culture', 'romantic'], bestSeason: 'Gegužė – Rugsėjis',
     imgUrl: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&q=85',
-    currentWeather: '23°C',
-    content: {
-      description: 'Baltų kupolų ir mėlyno dangaus ikona — Egėjo jūroje.',
-      highlights: ['Oia saulėlydis', 'Fira miestelis', 'Raudonasis paplūdimys', 'Vulkano ekskursija'],
-      flightHours: 4,
-      minDailyBudget: 90,
-      startingPrice: 1650,
-    },
+    currentWeather: '23°C', lat: 36.3932, lng: 25.4615, radiusKm: 15,
+    content: { description: 'Baltų kupolų ir mėlyno dangaus ikona — Egėjo jūroje.', highlights: ['Oia saulėlydis', 'Fira miestelis', 'Raudonasis paplūdimys', 'Vulkano ekskursija'], flightHours: 4, minDailyBudget: 90, startingPrice: 1650 },
   },
   {
-    id: 'vienna',
-    name: 'Viena',
-    country: 'Austrija',
-    styles: ['culture', 'history', 'city'],
-    bestSeason: 'Balandis – Birželis',
+    id: 'vienna', name: 'Viena', country: 'Austrija',
+    styles: ['culture', 'history', 'city'], bestSeason: 'Balandis – Birželis',
     imgUrl: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=1920&q=85',
-    currentWeather: '14°C',
-    content: {
-      description: 'Imperijos sostinė — muzikos, meno ir kavos kultūros centras.',
-      highlights: ['Schönbrunno rūmai', 'Stephansdom', 'Kunsthistorisches muziejus', 'Prateris'],
-      flightHours: 2.5,
-      minDailyBudget: 65,
-      startingPrice: 1100,
-    },
+    currentWeather: '14°C', lat: 48.2082, lng: 16.3738, radiusKm: 20,
+    content: { description: 'Imperijos sostinė — muzikos, meno ir kavos kultūros centras.', highlights: ['Schönbrunno rūmai', 'Stephansdom', 'Kunsthistorisches muziejus', 'Prateris'], flightHours: 2.5, minDailyBudget: 65, startingPrice: 1100 },
   },
   {
-    id: 'berlin',
-    name: 'Berlynas',
-    country: 'Vokietija',
-    styles: ['culture', 'history', 'city'],
-    bestSeason: 'Birželis – Rugpjūtis',
+    id: 'berlin', name: 'Berlynas', country: 'Vokietija',
+    styles: ['culture', 'history', 'city'], bestSeason: 'Birželis – Rugpjūtis',
     imgUrl: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=1920&q=85',
-    currentWeather: '11°C',
-    content: {
-      description: 'Kūrybos ir istorijos miestas — sienų griūtis ir naujoji Europa.',
-      highlights: ['Berlyno sienos memorialas', 'Brandenburgo vartai', 'Muziejų sala', 'Kreuzberg kvartalas'],
-      flightHours: 2,
-      minDailyBudget: 55,
-      startingPrice: 980,
-    },
+    currentWeather: '11°C', lat: 52.5200, lng: 13.4050, radiusKm: 25,
+    content: { description: 'Kūrybos ir istorijos miestas — sienų griūtis ir naujoji Europa.', highlights: ['Berlyno sienos memorialas', 'Brandenburgo vartai', 'Muziejų sala', 'Kreuzberg kvartalas'], flightHours: 2, minDailyBudget: 55, startingPrice: 980 },
   },
   {
-    id: 'bali',
-    name: 'Balis',
-    country: 'Indonezija',
-    styles: ['beach', 'nature', 'culture'],
-    bestSeason: 'Balandis – Spalis',
+    id: 'bali', name: 'Balis', country: 'Indonezija',
+    styles: ['beach', 'nature', 'culture'], bestSeason: 'Balandis – Spalis',
     imgUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=1920&q=85',
-    currentWeather: '29°C',
-    content: {
-      description: 'Dievų sala — ryžių terasos, šventyklos ir vandenynas.',
-      highlights: ['Ubudo ryžių terasos', 'Tanah Lot šventykla', 'Seminyak paplūdimys', 'Monkey Forest'],
-      flightHours: 13,
-      minDailyBudget: 35,
-      startingPrice: 1800,
-    },
+    currentWeather: '29°C', lat: -8.3405, lng: 115.0920, radiusKm: 50,
+    content: { description: 'Dievų sala — ryžių terasos, šventyklos ir vandenynas.', highlights: ['Ubudo ryžių terasos', 'Tanah Lot šventykla', 'Seminyak paplūdimys', 'Monkey Forest'], flightHours: 13, minDailyBudget: 35, startingPrice: 1800 },
   },
   {
-    id: 'tbilisi',
-    name: 'Tbilisis',
-    country: 'Gruzija',
-    styles: ['culture', 'history', 'food'],
-    bestSeason: 'Balandis – Birželis',
+    id: 'tbilisi', name: 'Tbilisis', country: 'Gruzija',
+    styles: ['culture', 'history', 'food'], bestSeason: 'Balandis – Birželis',
     imgUrl: 'https://images.unsplash.com/photo-1567591370978-f3286bfc00a1?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1567591370978-f3286bfc00a1?w=1920&q=85',
-    currentWeather: '17°C',
-    content: {
-      description: 'Senovinis Kaukazo miestas — vynas, khinkali ir sieros vonios.',
-      highlights: ['Narikala tvirtovė', 'Sioni katedra', 'Abanotubani sieros vonios', 'Rustaveli prospektas'],
-      flightHours: 4,
-      minDailyBudget: 30,
-      startingPrice: 750,
-    },
+    currentWeather: '17°C', lat: 41.6938, lng: 44.8015, radiusKm: 20,
+    content: { description: 'Senovinis Kaukazo miestas — vynas, khinkali ir sieros vonios.', highlights: ['Narikala tvirtovė', 'Sioni katedra', 'Abanotubani sieros vonios', 'Rustaveli prospektas'], flightHours: 4, minDailyBudget: 30, startingPrice: 750 },
   },
 ];
 
+// ─── Attractions ──────────────────────────────────────────────────────────────
+
+const attractions: {
+  id: string; name: string; lat: number; lng: number;
+  category: AttractionCategory; description: string; img: string;
+  priceAndDuration?: string; openingHours?: string; bestTime?: string;
+  content: Record<string, unknown>;
+}[] = [
+  // Barcelona
+  { id: 'sagrada-familia', name: 'Sagrada Família', lat: 41.4036, lng: 2.1744, category: 'popular', description: 'Gaudí\'s unfinished basilica — the most visited monument in Spain.', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800', priceAndDuration: '€26 · 1–2h', openingHours: '9:00–20:00', bestTime: 'Morning', content: { hook: 'Over 140 years in the making and still not finished.', tip: 'Book tickets at least 2 weeks ahead.', photos: [] } },
+  { id: 'park-guell', name: 'Park Güell', lat: 41.4145, lng: 2.1527, category: 'popular', description: 'UNESCO-listed park with mosaic terraces and city panoramas.', img: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=800', priceAndDuration: '€10 · 1–2h', openingHours: '9:30–19:30', bestTime: 'Late afternoon', content: { hook: 'The dragon staircase is one of the most photographed spots in Barcelona.', tip: 'The free zones around the monumental area are worth exploring too.' } },
+  { id: 'la-boqueria', name: 'La Boqueria', lat: 41.3817, lng: 2.1718, category: 'popular', description: 'Barcelona\'s iconic covered market on La Rambla.', img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800', priceAndDuration: 'Free · 1h', openingHours: '8:00–20:30', bestTime: 'Weekday morning', content: { hook: 'Over 200 stalls selling fresh produce, seafood, and tapas.', tip: 'Avoid weekends — head to Mercat de Santa Caterina instead.' } },
+  { id: 'gothic-quarter-bcn', name: 'Gothic Quarter', lat: 41.3825, lng: 2.1769, category: 'gem', description: 'Medieval labyrinth of narrow streets in the heart of Barcelona.', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800', priceAndDuration: 'Free · 2–3h', openingHours: 'Always open', bestTime: 'Evening', content: { hook: 'Some streets date back to Roman times.', tip: 'Get lost on purpose — the best finds are off the main paths.' } },
+  { id: 'casa-batllo', name: 'Casa Batlló', lat: 41.3916, lng: 2.1650, category: 'popular', description: 'Gaudí\'s spectacular modernista masterpiece on Passeig de Gràcia.', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800', priceAndDuration: '€35 · 1–2h', openingHours: '9:00–21:00', bestTime: 'Magic Night event', content: { hook: 'The facade is inspired by the legend of Saint George and the dragon.', tip: 'The rooftop terrace at night is magical.' } },
+  { id: 'barceloneta-beach', name: 'Barceloneta Beach', lat: 41.3793, lng: 2.1907, category: 'popular', description: 'Barcelona\'s most famous urban beach, 1.9 km of golden sand.', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800', priceAndDuration: 'Free', openingHours: 'Always open', bestTime: 'Early morning or late afternoon', content: { hook: 'Remarkably clean for a city beach.', tip: 'Avoid peak hours (12:00–17:00) in July and August.' } },
+  { id: 'palau-musica', name: 'Palau de la Música Catalana', lat: 41.3875, lng: 2.1754, category: 'gem', description: 'Stunning Art Nouveau concert hall — a UNESCO World Heritage Site.', img: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800', priceAndDuration: '€22 guided tour · 1h', openingHours: 'Tours 10:00–15:30', bestTime: 'Morning', content: { hook: 'Built by Domènech i Montaner as a gift to Barcelona\'s choral society.', tip: 'Attend a concert for the full experience — tickets from €15.' } },
+  { id: 'montjuic-castle', name: 'Montjuïc Castle', lat: 41.3638, lng: 2.1661, category: 'gem', description: '18th-century military fortress with panoramic views of Barcelona and the sea.', img: 'https://images.unsplash.com/photo-1512253037373-90bdc4c43a8b?w=800', priceAndDuration: '€5 · 1–2h', openingHours: '10:00–18:00', bestTime: 'Sunset', content: { hook: 'Used as a political prison until 1960.', tip: 'Take the cable car from Barceloneta for spectacular views.' } },
+  { id: 'picasso-museum-bcn', name: 'Picasso Museum', lat: 41.3851, lng: 2.1808, category: 'popular', description: 'One of the most important collections of Picasso\'s early works.', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', priceAndDuration: '€14 · 1–2h', openingHours: '10:00–19:00', bestTime: 'Weekday', content: { hook: 'Housed in five adjacent medieval palaces.', tip: 'Free on the first Sunday of the month.' } },
+  { id: 'camp-nou', name: 'Camp Nou', lat: 41.3809, lng: 2.1228, category: 'popular', description: 'FC Barcelona\'s legendary stadium — largest in Europe at 99,354 seats.', img: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800', priceAndDuration: '€26 museum · 2h', openingHours: '10:00–18:30', bestTime: 'Match day', content: { hook: 'Barça is more than a club — it\'s a symbol of Catalan identity.', tip: 'Attend a La Liga match for the real atmosphere.' } },
+
+  // Lisbon
+  { id: 'alfama', name: 'Alfama District', lat: 38.7108, lng: -9.1394, category: 'popular', description: 'Lisbon\'s oldest neighbourhood — Moorish streets, fado, and viewpoints.', img: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800', priceAndDuration: 'Free · 2–3h', openingHours: 'Always open', bestTime: 'Late afternoon', content: { hook: 'The only neighbourhood that survived the 1755 earthquake intact.', tip: 'Follow the sound of fado on Thursday evenings.' } },
+  { id: 'belem-tower', name: 'Belém Tower', lat: 38.6916, lng: -9.2160, category: 'popular', description: 'Iconic 16th-century fortress on the Tagus river, UNESCO listed.', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', priceAndDuration: '€8 · 1h', openingHours: '10:00–17:30', bestTime: 'Morning', content: { hook: 'Built to defend Lisbon\'s harbour during the Age of Discovery.', tip: 'Combine with Jerónimos Monastery — they are 10 min apart on foot.' } },
+  { id: 'jeronimos-monastery', name: 'Jerónimos Monastery', lat: 38.6978, lng: -9.2065, category: 'popular', description: 'Manueline masterpiece — Vasco da Gama is buried here.', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', priceAndDuration: '€15 · 1–2h', openingHours: '10:00–17:30', bestTime: 'Weekday morning', content: { hook: 'Built to celebrate Vasco da Gama\'s return from India in 1499.', tip: 'The south portal is one of the finest examples of Manueline art.' } },
+  { id: 'lx-factory', name: 'LX Factory', lat: 38.7019, lng: -9.1772, category: 'gem', description: 'Creative hub in a 19th-century industrial complex — shops, restaurants, events.', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', priceAndDuration: 'Free · 2h', openingHours: '12:00–00:00 (Sun market 10:00–18:00)', bestTime: 'Sunday market', content: { hook: 'The Sunday market draws Lisbon\'s best food and artisan vendors.', tip: 'Book dinner at one of the restaurants in advance on weekends.' } },
+  { id: 'sao-jorge-castle', name: 'São Jorge Castle', lat: 38.7139, lng: -9.1334, category: 'popular', description: 'Moorish hilltop castle with sweeping views over Lisbon\'s rooftops.', img: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800', priceAndDuration: '€15 · 1–2h', openingHours: '9:00–21:00', bestTime: 'Sunset', content: { hook: 'Occupied continuously since 48 BC — Phoenicians, Romans, Moors, and Portuguese.', tip: 'The views from the ramparts at sunset are breathtaking.' } },
+  { id: 'azulejo-museum', name: 'Museu Nacional do Azulejo', lat: 38.7249, lng: -9.1185, category: 'gem', description: 'Dedicated entirely to the traditional Portuguese decorative tile.', img: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800', priceAndDuration: '€5 · 1–2h', openingHours: '10:00–18:00', bestTime: 'Weekday', content: { hook: 'The 18th-century panorama of Lisbon before the 1755 earthquake is unmissable.', tip: 'One of the most underrated museums in Europe.' } },
+  { id: 'praca-comercio', name: 'Praça do Comércio', lat: 38.7075, lng: -9.1364, category: 'popular', description: 'Lisbon\'s grand waterfront square — the historic gateway to the city.', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', priceAndDuration: 'Free', openingHours: 'Always open', bestTime: 'Evening', content: { hook: 'Once the site of the Royal Palace before the earthquake destroyed it.', tip: 'Take the ferry across the Tagus for a spectacular view of the square.' } },
+  { id: 'time-out-market', name: 'Time Out Market Lisboa', lat: 38.7071, lng: -9.1477, category: 'popular', description: 'Curated food hall featuring the best of Lisbon\'s chefs under one roof.', img: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800', priceAndDuration: 'Free entry · €10–20 per meal', openingHours: '10:00–00:00', bestTime: 'Lunch', content: { hook: 'The original — over 40 restaurants and 8 bars in the historic Mercado da Ribeira.', tip: 'The pastel de nata from Manteigaria here is the best in the city.' } },
+  { id: 'miradouro-graca', name: 'Miradouro da Graça', lat: 38.7183, lng: -9.1299, category: 'gem', description: 'Lisbon\'s best-kept viewpoint secret — stunning castle and river views.', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', priceAndDuration: 'Free', openingHours: 'Always open', bestTime: 'Sunset', content: { hook: 'Less touristy than Portas do Sol and Santa Luzia — locals come here.', tip: 'Get there early for sunset — it fills up fast on warm evenings.' } },
+  { id: 'oceanarium-lisbon', name: 'Lisbon Oceanarium', lat: 38.7630, lng: -9.0940, category: 'popular', description: 'One of Europe\'s best aquariums — a central tank you can view from two floors.', img: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800', priceAndDuration: '€23 · 2h', openingHours: '10:00–20:00', bestTime: 'Weekday', content: { hook: 'The sunfish (mola mola) exhibit is one of only a handful in the world.', tip: 'Great for rainy days — buy tickets online to skip the queue.' } },
+
+  // Rome
+  { id: 'colosseum', name: 'Colosseum', lat: 41.8902, lng: 12.4922, category: 'popular', description: 'The iconic amphitheatre of ancient Rome — once held 80,000 spectators.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: '€18 · 2–3h', openingHours: '9:00–19:00', bestTime: 'First entry slot', content: { hook: 'Gladiatorial combat here lasted until 404 AD.', tip: 'The €18 ticket includes the Roman Forum and Palatine Hill — use all three.' } },
+  { id: 'vatican-museums', name: 'Vatican Museums', lat: 41.9065, lng: 12.4536, category: 'popular', description: 'World\'s largest museum complex — home to the Sistine Chapel.', img: 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=800', priceAndDuration: '€20 · 3–4h', openingHours: '9:00–18:00', bestTime: 'Early morning', content: { hook: 'Michelangelo painted the Sistine Chapel ceiling lying on his back over 4 years.', tip: 'Book well in advance — queues without a ticket can be 3–4 hours.' } },
+  { id: 'trevi-fountain', name: 'Trevi Fountain', lat: 41.9009, lng: 12.4833, category: 'popular', description: 'Rome\'s grandest baroque fountain — throw a coin to guarantee your return.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: 'Free', openingHours: 'Always open', bestTime: 'Before 7am or after 11pm', content: { hook: 'Roughly €3,000 is thrown in each day, donated to charity.', tip: 'Come at dawn or late night to avoid the crush.' } },
+  { id: 'roman-forum', name: 'Roman Forum', lat: 41.8925, lng: 12.4853, category: 'popular', description: 'The political and social heart of ancient Rome for over 900 years.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: 'Included with Colosseum · 1–2h', openingHours: '9:00–19:00', bestTime: 'Afternoon', content: { hook: 'Julius Caesar was cremated here.', tip: 'Wear comfortable shoes — the ancient cobblestones are uneven.' } },
+  { id: 'pantheon-rome', name: 'Pantheon', lat: 41.8986, lng: 12.4769, category: 'popular', description: 'The best-preserved ancient building in the world — 2000 years old.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: '€5 · 30–60min', openingHours: '9:00–19:00', bestTime: 'Rainy day (oculus effect)', content: { hook: 'The unreinforced concrete dome is still the world\'s largest.', tip: 'On rainy days the rain falls through the oculus and drains through the floor — worth experiencing.' } },
+  { id: 'piazza-navona', name: 'Piazza Navona', lat: 41.8992, lng: 12.4730, category: 'popular', description: 'Rome\'s most elegant baroque piazza — three fountains, street artists, cafes.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: 'Free', openingHours: 'Always open', bestTime: 'Evening', content: { hook: 'Built on the site of a 1st-century stadium that held 30,000 spectators.', tip: 'Avoid the tourist cafes on the square — the food nearby is half the price.' } },
+  { id: 'borghese-gallery', name: 'Borghese Gallery', lat: 41.9139, lng: 12.4922, category: 'gem', description: 'Intimate gallery with some of Bernini\'s finest sculptures and Caravaggio paintings.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: '€20 · 2h (strictly timed)', openingHours: '9:00–19:00 (2h slots)', bestTime: 'First slot (9:00)', content: { hook: 'Only 360 visitors allowed at a time — the most exclusive museum in Rome.', tip: 'Book 2–3 months in advance. This is non-negotiable.' } },
+  { id: 'trastevere', name: 'Trastevere', lat: 41.8886, lng: 12.4695, category: 'gem', description: 'Rome\'s bohemian neighbourhood — medieval streets, ivy-covered buildings, trattorias.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: 'Free · 2–3h', openingHours: 'Always open', bestTime: 'Evening', content: { hook: 'Home to some of Rome\'s oldest churches, including the 4th-century Santa Maria.', tip: 'Come for aperitivo at 18:00 and stay for dinner — the best trattorias are here.' } },
+  { id: 'spanish-steps-rome', name: 'Spanish Steps', lat: 41.9058, lng: 12.4823, category: 'popular', description: 'Baroque staircase of 135 steps — a classic Rome meeting point.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: 'Free', openingHours: 'Always open', bestTime: 'Spring (azaleas bloom)', content: { hook: 'Named after the Spanish Embassy nearby, despite being entirely funded by the French.', tip: 'In spring the steps are covered in azaleas — stunning for photos.' } },
+  { id: 'castel-santangelo', name: 'Castel Sant\'Angelo', lat: 41.9031, lng: 12.4663, category: 'gem', description: 'Former mausoleum, fortress, and papal prison — now a museum with rooftop views.', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', priceAndDuration: '€15 · 1–2h', openingHours: '9:00–19:30', bestTime: 'Sunset from rooftop', content: { hook: 'The Passetto di Borgo is a secret corridor popes used to escape to safety.', tip: 'The rooftop bar is open in summer — best sunset view in Rome.' } },
+
+  // Paris
+  { id: 'eiffel-tower', name: 'Eiffel Tower', lat: 48.8584, lng: 2.2945, category: 'popular', description: 'The world\'s most visited paid monument — 330m of iron lattice.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: '€29 top floor · 2h', openingHours: '9:00–23:45', bestTime: 'Dusk', content: { hook: 'Built in just 2 years, 2 months, and 5 days for the 1889 World\'s Fair.', tip: 'Book the summit ticket online weeks in advance. Stairs tickets are easier to get.' } },
+  { id: 'louvre-museum', name: 'Louvre Museum', lat: 48.8606, lng: 2.3376, category: 'popular', description: 'World\'s largest art museum — 380,000 objects, 35,000 on display.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: '€22 · 3–6h', openingHours: '9:00–18:00', bestTime: 'Wednesday/Friday evening (open until 21:45)', content: { hook: 'It would take 200 days to see everything in the Louvre, spending 30 seconds per piece.', tip: 'Focus on 2–3 wings max. The Mona Lisa room is always packed — see it first.' } },
+  { id: 'notre-dame', name: 'Notre-Dame Cathedral', lat: 48.8530, lng: 2.3499, category: 'popular', description: 'Gothic masterpiece on the Île de la Cité — reopened in 2024 after restoration.', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800', priceAndDuration: 'Free · 1h', openingHours: '8:00–19:00', bestTime: 'Weekday morning', content: { hook: 'Construction began in 1163 and took nearly 200 years.', tip: 'Climb the towers for the best gargoyle photos in Paris.' } },
+  { id: 'sacre-coeur', name: 'Sacré-Cœur', lat: 48.8867, lng: 2.3431, category: 'popular', description: 'White Romano-Byzantine basilica at the top of Montmartre hill.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: 'Free', openingHours: '6:00–22:30', bestTime: 'Sunrise', content: { hook: 'The dome offers a 360° view stretching 50 km on a clear day.', tip: 'Watch the sunrise from the steps — Paris is empty and magical at 6am.' } },
+  { id: 'musee-dorsay', name: 'Musée d\'Orsay', lat: 48.8600, lng: 2.3266, category: 'popular', description: 'World\'s finest Impressionist collection — Monet, Renoir, Van Gogh, Degas.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: '€16 · 2–3h', openingHours: '9:30–18:00', bestTime: 'Thursday evening', content: { hook: 'Housed in a Beaux-Arts railway station built for the 1900 World\'s Fair.', tip: 'Thursday open until 21:45 — the evening crowd is much smaller.' } },
+  { id: 'versailles', name: 'Palace of Versailles', lat: 48.8049, lng: 2.1204, category: 'popular', description: 'The Sun King\'s palace — 2,300 rooms, 800 hectares of gardens.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: '€20 · 4–6h', openingHours: '9:00–17:30', bestTime: 'Tuesdays (closed Mondays)', content: { hook: 'Louis XIV moved the court here in 1682 — 20,000 people lived on the grounds.', tip: 'Buy the Palace + Gardens ticket. The gardens alone are worth 2 hours.' } },
+  { id: 'centre-pompidou', name: 'Centre Pompidou', lat: 48.8607, lng: 2.3523, category: 'gem', description: 'Inside-out high-tech building — Europe\'s largest modern art museum.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: '€15 · 2–3h', openingHours: '11:00–21:00', bestTime: 'Evening', content: { hook: 'The architects hid nothing — pipes, ducts, and escalators are all outside the building.', tip: 'The rooftop terrace has one of the best free views in Paris.' } },
+  { id: 'arc-de-triomphe', name: 'Arc de Triomphe', lat: 48.8738, lng: 2.2950, category: 'popular', description: 'Napoleon\'s triumphal arch at the centre of 12 radiating avenues.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: '€13 rooftop · 1h', openingHours: '10:00–23:00', bestTime: 'Night', content: { hook: 'The Tomb of the Unknown Soldier has burned continuously since 1923.', tip: 'Use the underground tunnel to cross — never cross the roundabout on foot.' } },
+  { id: 'le-marais', name: 'Le Marais', lat: 48.8560, lng: 2.3617, category: 'gem', description: 'Paris\'s hippest neighbourhood — medieval mansions, galleries, falafel, vintage shops.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: 'Free · 3h', openingHours: 'Always open', bestTime: 'Saturday afternoon', content: { hook: 'Home to Paris\'s Jewish quarter, oldest square (Place des Vosges), and best falafel.', tip: 'L\'As du Fallafel on Rue des Rosiers is a Marais institution — queue early.' } },
+  { id: 'palais-royal', name: 'Palais-Royal Gardens', lat: 48.8638, lng: 2.3369, category: 'gem', description: 'Secret garden with arcaded galleries, cafes, and the black-and-white column art.', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', priceAndDuration: 'Free', openingHours: '8:00–23:00', bestTime: 'Morning', content: { hook: 'One of the best-kept secrets in central Paris — most tourists walk right past it.', tip: 'The Buren columns in the courtyard are Instagram gold with zero crowds.' } },
+
+  // Kyoto
+  { id: 'fushimi-inari', name: 'Fushimi Inari-taisha', lat: 34.9671, lng: 135.7727, category: 'popular', description: 'Thousands of vermillion torii gates winding up Mount Inari.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: 'Free · 2–4h', openingHours: 'Always open', bestTime: 'Before 7am or after 6pm', content: { hook: 'There are over 10,000 torii gates — donated by businesses for good fortune.', tip: 'Most tourists stop at the first two gates. Hike all the way up for solitude.' } },
+  { id: 'arashiyama-bamboo', name: 'Arashiyama Bamboo Grove', lat: 35.0170, lng: 135.6720, category: 'popular', description: 'Iconic bamboo forest with towering stalks that creak in the wind.', img: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800', priceAndDuration: 'Free · 30min', openingHours: 'Always open', bestTime: 'Before 8am', content: { hook: 'The grove is surprisingly small — combine with Tenryu-ji garden next door.', tip: 'Go at dawn when mist rises from the bamboo. Completely different experience.' } },
+  { id: 'kinkakuji', name: 'Kinkaku-ji (Golden Pavilion)', lat: 35.0394, lng: 135.7292, category: 'popular', description: 'Zen Buddhist temple covered in gold leaf — reflected in a mirror pond.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: '¥500 · 1h', openingHours: '9:00–17:00', bestTime: 'Winter snowfall or spring', content: { hook: 'Burned down by a monk in 1950 and rebuilt identically in 1955.', tip: 'The garden circuit takes 20 minutes — short but perfectly formed.' } },
+  { id: 'gion-district', name: 'Gion District', lat: 35.0036, lng: 135.7750, category: 'popular', description: 'Kyoto\'s famous geisha district — preserved machiya townhouses and ochaya teahouses.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: 'Free · 2h', openingHours: 'Always open', bestTime: '17:00–20:00', content: { hook: 'Geiko (geisha) and maiko (apprentices) still work here — maybe 200 remaining in Kyoto.', tip: 'Don\'t photograph or touch geiko/maiko — it is considered deeply disrespectful.' } },
+  { id: 'nishiki-market', name: 'Nishiki Market', lat: 35.0052, lng: 135.7657, category: 'gem', description: 'Kyoto\'s "Kitchen" — a covered 400-metre arcade of food stalls.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: 'Free · 1–2h', openingHours: '9:00–18:00', bestTime: 'Late morning', content: { hook: 'Over 100 shops selling pickles, tofu, fresh dashi, and Kyoto sweets.', tip: 'Try yudofu (tofu hot pot) from one of the standing bars — a Kyoto speciality.' } },
+  { id: 'kiyomizudera', name: 'Kiyomizu-dera', lat: 34.9948, lng: 135.7850, category: 'popular', description: 'Buddhist temple built on a wooden stage jutting from a hillside — no nails used.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: '¥500 · 1–2h', openingHours: '6:00–18:00', bestTime: 'Autumn (maple leaves) or spring (cherry blossoms)', content: { hook: '"To jump off the stage at Kiyomizu" is a Japanese idiom for taking a bold decision.', tip: 'The night illuminations in spring and autumn are extraordinary — check the schedule.' } },
+  { id: 'nijo-castle', name: 'Nijo Castle', lat: 35.0142, lng: 135.7481, category: 'gem', description: 'Tokugawa shogun\'s Kyoto residence — famous for its "nightingale floors" that squeak.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: '¥1,300 · 1–2h', openingHours: '8:45–17:00', bestTime: 'Weekday', content: { hook: 'The floors were designed to squeak to alert guards of intruders — ingenious security.', tip: 'The Ninomaru Palace has stunning gilded screen paintings from the Kano school.' } },
+  { id: 'ryoanji', name: 'Ryoan-ji Rock Garden', lat: 35.0345, lng: 135.7183, category: 'gem', description: 'The world\'s most famous Zen rock garden — 15 stones, none visible all at once.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: '¥600 · 1h', openingHours: '8:00–17:00', bestTime: 'Weekday morning', content: { hook: 'No one knows who made it or what it means. That ambiguity is the point.', tip: 'Sit and observe for at least 15 minutes — it changes as your mind quiets.' } },
+  { id: 'philosophers-path', name: 'Philosopher\'s Path', lat: 35.0271, lng: 135.7924, category: 'gem', description: '2-km stone path along a canal — lined with hundreds of cherry trees.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: 'Free · 1h walk', openingHours: 'Always open', bestTime: 'Late March to early April (cherry blossom)', content: { hook: 'Named after philosopher Nishida Kitaro who walked it daily in meditation.', tip: 'The coffee shops and galleries along the path are perfect for a slow morning.' } },
+  { id: 'heian-jingu', name: 'Heian Jingu Shrine', lat: 35.0162, lng: 135.7826, category: 'popular', description: 'Vermillion Shinto shrine with Japan\'s finest stroll garden.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: 'Shrine free, garden ¥600 · 1–2h', openingHours: '6:00–18:00 (garden 8:30–17:30)', bestTime: 'Late April (weeping cherry in garden)', content: { hook: 'Built in 1895 to commemorate the 1,100th anniversary of Kyoto as capital.', tip: 'The garden iris bloom in June is one of Kyoto\'s most spectacular seasonal sights.' } },
+];
+
+// ─── Restaurants ──────────────────────────────────────────────────────────────
+
+const restaurants: {
+  id: string; name: string; lat: number; lng: number;
+  type: string; cuisine?: string; price: string;
+  openingHours?: string; delivery: boolean; petFriendly: boolean;
+  img?: string; content: Record<string, unknown>;
+}[] = [
+  // Barcelona
+  { id: 'el-xampanyet-bcn', name: 'El Xampanyet', lat: 41.3846, lng: 2.1808, type: 'Tapas baras', cuisine: 'Catalan', price: '€€', openingHours: '12:00–16:00, 19:00–23:30', delivery: false, petFriendly: true, content: { description: 'Classic Catalan tapas bar near the Picasso Museum — house cava is legendary.', signature: 'House cava + anchovies', reviews: [{ text: 'The best anchovies in Barcelona.', author: 'María G.', rating: '5/5' }] } },
+  { id: 'la-cova-fumada-bcn', name: 'La Cova Fumada', lat: 41.3892, lng: 2.1913, type: 'Jūros gėrybės', cuisine: 'Catalan seafood', price: '€€', openingHours: '9:00–15:00 (Mon–Sat, closed weekends)', delivery: false, petFriendly: false, content: { description: 'Birthplace of the bomba (fried potato ball) — cash only, no reservation.', signature: 'Bomba + calamari', reviews: [{ text: 'Arrive before 9am or wait in line.', author: 'Pau M.', rating: '5/5' }] } },
+  { id: 'bar-del-pla-bcn', name: 'Bar del Pla', lat: 41.3847, lng: 2.1774, type: 'Tapas', cuisine: 'Catalan', price: '€€', openingHours: '12:00–23:00', delivery: false, petFriendly: true, content: { description: 'Modern Catalan tapas in the Born — great vermouth selection.', signature: 'Croquetas de jamón', reviews: [] } },
+  { id: 'tickets-bcn', name: 'Tickets', lat: 41.3751, lng: 2.1577, type: 'fine', cuisine: 'Modern tapas', price: '€€€€', openingHours: '13:00–15:30, 19:00–22:00 (Tue–Sat)', delivery: false, petFriendly: false, content: { description: 'Albert Adrià\'s famous tapas bar — one of the world\'s best restaurants.', signature: 'Olive oil bonbons', reviews: [{ text: 'Book 2 months ahead. Worth every cent.', author: 'Sophie K.', rating: '5/5' }] } },
+  { id: 'cerveceria-catalana-bcn', name: 'Cervecería Catalana', lat: 41.3912, lng: 2.1644, type: 'Tapas', cuisine: 'Spanish', price: '€€', openingHours: '9:00–00:30', delivery: false, petFriendly: true, content: { description: 'Bustling tapas bar on Carrer de Mallorca — best patatas bravas in Eixample.', signature: 'Patatas bravas + montaditos', reviews: [] } },
+  { id: 'federal-cafe-bcn', name: 'Federal Café', lat: 41.3780, lng: 2.1675, type: 'breakfast', cuisine: 'Australian café', price: '€€', openingHours: '8:30–16:00', delivery: false, petFriendly: true, content: { description: 'Barcelona\'s original specialty coffee and brunch spot in Sant Antoni.', signature: 'Avocado toast + cortado', reviews: [] } },
+  { id: 'la-mar-salada-bcn', name: 'La Mar Salada', lat: 41.3780, lng: 2.1867, type: 'Jūros gėrybės', cuisine: 'Seafood', price: '€€€', openingHours: '13:00–16:00, 20:00–23:00', delivery: false, petFriendly: false, content: { description: 'Seafood restaurant with sea views near Barceloneta — excellent paella.', signature: 'Seafood paella + fideuà', reviews: [] } },
+  { id: 'bodega-sepulveda-bcn', name: 'Bodega Sepúlveda', lat: 41.3791, lng: 2.1561, type: 'Baras', cuisine: 'Wine bar', price: '€', openingHours: '18:00–02:00', delivery: false, petFriendly: true, content: { description: 'Tiny neighbourhood wine bar in Sant Antoni — natural wines, cheese, charcuterie.', signature: 'Natural wine + manchego', reviews: [] } },
+  { id: 'bar-marsella-bcn', name: 'Bar Marsella', lat: 41.3811, lng: 2.1753, type: 'Baras', cuisine: 'Historic bar', price: '€', openingHours: '22:00–03:00 (Mon–Sat)', delivery: false, petFriendly: false, content: { description: 'Barcelona\'s oldest bar (1820) — dusty absinthe bottles and Hemingway\'s ghost.', signature: 'Absinthe', reviews: [{ text: 'Step back 200 years. Nothing has changed.', author: 'James R.', rating: '5/5' }] } },
+  { id: 'els-quatre-gats-bcn', name: 'Els Quatre Gats', lat: 41.3834, lng: 2.1719, type: 'local', cuisine: 'Catalan', price: '€€€', openingHours: '9:00–00:00', delivery: false, petFriendly: false, content: { description: 'Legendary modernista café where Picasso held his first exhibition in 1900.', signature: 'Escudella i carn d\'olla', reviews: [] } },
+
+  // Lisbon
+  { id: 'taberna-rua-flores', name: 'Taberna da Rua das Flores', lat: 38.7108, lng: -9.1394, type: 'local', cuisine: 'Portuguese', price: '€€', openingHours: '12:00–15:00, 19:30–22:30 (closed Sun)', delivery: false, petFriendly: false, content: { description: 'Small plates of traditional Portuguese food — one of Lisbon\'s most beloved tascas.', signature: 'Meia desfeita + grilled chouriço', reviews: [{ text: 'The best tasca in Lisbon.', author: 'Ana P.', rating: '5/5' }] } },
+  { id: 'a-cevicheria', name: 'A Cevicheria', lat: 38.7158, lng: -9.1484, type: 'Jūros gėrybės', cuisine: 'Peruvian-Portuguese', price: '€€€', openingHours: '12:30–00:00', delivery: false, petFriendly: false, content: { description: 'Outstanding ceviche and seafood with a Portuguese twist — no reservations, queue early.', signature: 'Polvo ceviche', reviews: [] } },
+  { id: 'solar-dos-presuntos', name: 'Solar dos Presuntos', lat: 38.7162, lng: -9.1414, type: 'local', cuisine: 'Traditional Portuguese', price: '€€€', openingHours: '12:00–15:30, 19:00–22:30 (closed Sun)', delivery: false, petFriendly: false, content: { description: 'Hanging hams, wine bottles, and old Lisbon family cooking since 1976.', signature: 'Bacalhau à brás + suckling pig', reviews: [] } },
+  { id: 'pasteis-belem', name: 'Pastéis de Belém', lat: 38.6976, lng: -9.2038, type: 'breakfast', cuisine: 'Pastry', price: '€', openingHours: '8:00–23:00', delivery: false, petFriendly: true, content: { description: 'The original pastel de nata since 1837 — the recipe is a protected secret.', signature: 'Pastel de nata (warm, with cinnamon)', reviews: [{ text: 'Worth the queue. Always.', author: 'Carla F.', rating: '5/5' }] } },
+  { id: 'tasca-do-chico', name: 'Tasca do Chico', lat: 38.7104, lng: -9.1464, type: 'local', cuisine: 'Fado dinner', price: '€€€', openingHours: '19:30–23:30 (Tue–Sat)', delivery: false, petFriendly: false, content: { description: 'Intimate fado house with live music every night — book well in advance.', signature: 'Bacalhau + live fado', reviews: [{ text: 'A defining Lisbon experience.', author: 'Tomas W.', rating: '5/5' }] } },
+  { id: 'time-out-market-food', name: 'Time Out Market Lisboa', lat: 38.7071, lng: -9.1477, type: 'popular', cuisine: 'Mixed', price: '€€', openingHours: '10:00–00:00', delivery: false, petFriendly: false, content: { description: 'The original food hall concept — 40+ stalls curated from Lisbon\'s best chefs.', signature: 'Manteigaria pastel de nata + fresh seafood', reviews: [] } },
+  { id: 'ze-da-mouraria', name: 'Zé da Mouraria', lat: 38.7165, lng: -9.1349, type: 'local', cuisine: 'Portuguese', price: '€', openingHours: '12:00–15:00 (Mon–Fri only)', delivery: false, petFriendly: false, content: { description: 'Tiny local lunch spot in Mouraria — 5 tables, daily specials on a chalkboard.', signature: 'Peixe do dia + wine carafe', reviews: [{ text: 'Maximum local authenticity. Cash only.', author: 'Rita S.', rating: '5/5' }] } },
+  { id: 'cervejaria-ramiro', name: 'Cervejaria Ramiro', lat: 38.7226, lng: -9.1379, type: 'Jūros gėrybės', cuisine: 'Seafood', price: '€€€', openingHours: '12:00–00:30 (closed Mon)', delivery: false, petFriendly: false, content: { description: 'Lisbon\'s legendary seafood beer hall — giant prawns, clams, crab since 1956.', signature: 'Gambas al ajillo + amêijoas à bulhão pato', reviews: [] } },
+  { id: 'o-corvo', name: 'O Corvo', lat: 38.7165, lng: -9.1425, type: 'Baras', cuisine: 'Natural wine bar', price: '€€', openingHours: '18:00–00:00 (closed Sun–Mon)', delivery: false, petFriendly: true, content: { description: 'Tiny natural wine bar in Bairro Alto — cork-covered ceiling, excellent cheese.', signature: 'Natural wine + cured meats', reviews: [] } },
+  { id: 'bettina-corallo', name: 'Bettina & Niccolo Corallo', lat: 38.7138, lng: -9.1479, type: 'Kava', cuisine: 'Chocolate & coffee', price: '€', openingHours: '10:00–20:00 (closed Sun)', delivery: false, petFriendly: true, content: { description: 'São Tomé single-origin chocolate and specialty coffee — a hidden gem.', signature: 'Hot chocolate + pralines', reviews: [] } },
+
+  // Rome
+  { id: 'da-enzo-al-29', name: 'Da Enzo al 29', lat: 41.8887, lng: 12.4730, type: 'local', cuisine: 'Roman trattoria', price: '€€', openingHours: '12:30–15:00, 19:30–23:00 (closed Sun dinner)', delivery: false, petFriendly: false, content: { description: 'Trastevere institution — classic Roman pasta done perfectly since 1935.', signature: 'Cacio e pepe + coda alla vaccinara', reviews: [{ text: 'The real deal. Book a week ahead.', author: 'Marco B.', rating: '5/5' }] } },
+  { id: 'tonnarello-rome', name: 'Tonnarello', lat: 41.8883, lng: 12.4701, type: 'local', cuisine: 'Roman', price: '€€', openingHours: '19:00–01:00', delivery: false, petFriendly: true, content: { description: 'Lively Trastevere trattoria with outdoor tables and live music on summer nights.', signature: 'Spaghetti alla carbonara', reviews: [] } },
+  { id: 'supplit-roma', name: 'Supplì Roma', lat: 41.8892, lng: 12.4724, type: 'popular', cuisine: 'Street food', price: '€', openingHours: '11:00–22:00', delivery: false, petFriendly: true, content: { description: 'Best supplì (fried rice balls) in Rome — queue out the door on weekends.', signature: 'Supplì al telefono (classic + spicy)', reviews: [] } },
+  { id: 'armando-al-pantheon', name: 'Armando al Pantheon', lat: 41.8987, lng: 12.4762, type: 'local', cuisine: 'Roman', price: '€€€', openingHours: '13:00–15:00, 19:00–23:00 (closed Sat dinner, Sun)', delivery: false, petFriendly: false, content: { description: 'Legendary family restaurant steps from the Pantheon — been here since 1961.', signature: 'Rigatoni alla pajata + artichokes alla romana', reviews: [] } },
+  { id: 'pizzarium-bonci', name: 'Pizzarium Bonci', lat: 41.9048, lng: 12.4576, type: 'popular', cuisine: 'Pizza al taglio', price: '€', openingHours: '11:00–22:00', delivery: false, petFriendly: false, content: { description: 'Gabriele Bonci\'s world-famous pizza by the slice near Vatican — sold by weight.', signature: 'Potato + rosemary pizza bianca', reviews: [{ text: 'The best pizza in Rome. Full stop.', author: 'Giulia R.', rating: '5/5' }] } },
+  { id: 'roscioli-rome', name: 'Roscioli', lat: 41.8957, lng: 12.4749, type: 'fine', cuisine: 'Roman deli-restaurant', price: '€€€', openingHours: '12:30–16:00, 18:30–00:00 (Mon–Sat)', delivery: false, petFriendly: false, content: { description: 'Part deli, part restaurant — extraordinary Italian ingredients, best carbonara in Rome.', signature: 'Carbonara + buffalo mozzarella', reviews: [] } },
+  { id: 'il-sorpasso', name: 'Il Sorpasso', lat: 41.9019, lng: 12.4612, type: 'Baras', cuisine: 'Aperitivo', price: '€€', openingHours: '7:30–00:00', delivery: false, petFriendly: true, content: { description: 'Prati neighbourhood favourite — excellent aperitivo, charcuterie, and natural wines.', signature: 'Aperol spritz + salumi board', reviews: [] } },
+  { id: 'forno-campo-de-fiori', name: 'Forno Campo de\' Fiori', lat: 41.8963, lng: 12.4720, type: 'breakfast', cuisine: 'Bakery', price: '€', openingHours: '7:30–14:30, 16:45–20:00 (closed Sun)', delivery: false, petFriendly: false, content: { description: 'Rome\'s finest bakery — the square pizza bianca here is worth the trip alone.', signature: 'Pizza bianca con mortadella', reviews: [] } },
+  { id: 'grazia-graziella', name: 'Grazia & Graziella', lat: 41.8899, lng: 12.4920, type: 'local', cuisine: 'Roman', price: '€€', openingHours: '12:30–15:00, 19:30–23:00 (Tue–Sun)', delivery: false, petFriendly: false, content: { description: 'Hidden Testaccio neighbourhood gem — traditional Roman Jewish cooking.', signature: 'Carciofi alla giudia + tonnarelli cacio e pepe', reviews: [] } },
+  { id: 'osteria-enoteca-rome', name: 'Osteria dell\'Enoteca', lat: 41.9001, lng: 12.4831, type: 'fine', cuisine: 'Roman wine bar', price: '€€€', openingHours: '19:30–23:30 (Tue–Sat)', delivery: false, petFriendly: false, content: { description: 'Intimate wine bar near Trevi with exceptional Italian wine list and seasonal menu.', signature: 'Seasonal tasting menu + aged Barolo', reviews: [] } },
+
+  // Paris
+  { id: 'le-comptoir-relais', name: 'Le Comptoir du Relais', lat: 48.8520, lng: 2.3399, type: 'local', cuisine: 'French bistro', price: '€€€', openingHours: '12:00–00:00', delivery: false, petFriendly: false, content: { description: 'Yves Camdeborde\'s celebrated Saint-Germain bistro — queue for weekday lunch.', signature: 'Pâté en croûte + steak tartare', reviews: [{ text: 'The best bistro in Paris. No question.', author: 'Claire D.', rating: '5/5' }] } },
+  { id: 'septime-paris', name: 'Septime', lat: 48.8522, lng: 2.3807, type: 'fine', cuisine: 'Modern French', price: '€€€€', openingHours: '12:15–13:30, 19:15–22:00 (Mon–Fri)', delivery: false, petFriendly: false, content: { description: 'One of Paris\'s hottest neo-bistros — seasonal tasting menu, natural wines.', signature: '4-course seasonal menu', reviews: [{ text: 'Book exactly 2 months ahead at 9am when slots open.', author: 'Thomas L.', rating: '5/5' }] } },
+  { id: 'frenchie-paris', name: 'Frenchie', lat: 48.8625, lng: 2.3505, type: 'fine', cuisine: 'Modern French', price: '€€€', openingHours: '19:00–23:00 (Mon–Fri)', delivery: false, petFriendly: false, content: { description: 'Greg Marchand\'s tiny restaurant that put Rue du Nil on the food map.', signature: 'Seasonal market menu', reviews: [] } },
+  { id: 'las-du-fallafel', name: 'L\'As du Fallafel', lat: 48.8570, lng: 2.3582, type: 'popular', cuisine: 'Israeli street food', price: '€', openingHours: '11:00–00:30 (closed Shabbat Fri sunset–Sat)', delivery: false, petFriendly: false, content: { description: 'Legendary Marais falafel — the special with all the toppings is iconic.', signature: 'Falafel special with aubergine + tahini', reviews: [] } },
+  { id: 'cafe-de-flore', name: 'Café de Flore', lat: 48.8537, lng: 2.3329, type: 'breakfast', cuisine: 'Parisian café', price: '€€€', openingHours: '7:30–01:30', delivery: false, petFriendly: true, content: { description: 'Saint-Germain\'s most famous café — Sartre and de Beauvoir worked here daily.', signature: 'Café crème + croque monsieur', reviews: [] } },
+  { id: 'brasserie-lipp', name: 'Brasserie Lipp', lat: 48.8535, lng: 2.3335, type: 'local', cuisine: 'Alsatian brasserie', price: '€€€', openingHours: '12:00–23:45', delivery: false, petFriendly: false, content: { description: 'Grand old brasserie where French politicians have lunched since 1880.', signature: 'Choucroute garnie + pied de porc', reviews: [] } },
+  { id: 'breizh-cafe-paris', name: 'Breizh Café', lat: 48.8569, lng: 2.3579, type: 'local', cuisine: 'Breton crêperie', price: '€€', openingHours: '11:30–23:00 (closed Tue)', delivery: false, petFriendly: false, content: { description: 'The finest Breton crêpes in Paris — artisan cidre and handmade salted caramel.', signature: 'Complète crêpe + salted caramel galette', reviews: [] } },
+  { id: 'pierre-herme-paris', name: 'Pierre Hermé', lat: 48.8529, lng: 2.3345, type: 'breakfast', cuisine: 'Patisserie', price: '€€', openingHours: '10:00–19:00', delivery: false, petFriendly: false, content: { description: 'The "Picasso of pastry" — macarons that are worth queuing for.', signature: 'Ispahan macaron (rose, lychee, raspberry)', reviews: [] } },
+  { id: 'marche-enfants-rouges', name: 'Marché des Enfants Rouges', lat: 48.8620, lng: 2.3600, type: 'popular', cuisine: 'Market', price: '€–€€€', openingHours: '8:30–20:30 (closed Mon)', delivery: false, petFriendly: true, content: { description: 'Paris\'s oldest covered market (1615) — Lebanese, Japanese, Italian, and French stalls.', signature: 'Lebanese mezze plate + Moroccan couscous', reviews: [] } },
+  { id: 'le-jules-verne', name: 'Le Jules Verne', lat: 48.8582, lng: 2.2942, type: 'fine', cuisine: 'French gastronomic', price: '€€€€', openingHours: '12:00–13:30, 19:00–21:30', delivery: false, petFriendly: false, content: { description: 'Frédéric Anton\'s Michelin-starred restaurant inside the Eiffel Tower, 2nd floor.', signature: 'Seasonal tasting menu with Eiffel Tower view', reviews: [] } },
+
+  // Kyoto
+  { id: 'nishiki-warai', name: 'Nishiki Warai', lat: 35.0050, lng: 135.7650, type: 'local', cuisine: 'Kyoto cuisine', price: '€€', openingHours: '11:30–14:30, 17:00–22:00', delivery: false, petFriendly: false, content: { description: 'Traditional Kyoto obanzai (small dishes) near Nishiki Market.', signature: 'Obanzai set + miso soup', reviews: [] } },
+  { id: 'tosuiro-kyoto', name: 'Tosuiro', lat: 35.0110, lng: 135.7720, type: 'fine', cuisine: 'Tofu kaiseki', price: '€€€€', openingHours: '12:00–14:00, 17:00–21:00 (closed Wed)', delivery: false, petFriendly: false, content: { description: 'Exquisite tofu kaiseki in a 200-year-old Kyoto machiya townhouse.', signature: 'Tofu kaiseki 9-course dinner', reviews: [{ text: 'The most beautiful meal in Kyoto.', author: 'Yuki H.', rating: '5/5' }] } },
+  { id: 'katsukura-kyoto', name: 'Katsukura', lat: 35.0068, lng: 135.7590, type: 'popular', cuisine: 'Tonkatsu', price: '€€', openingHours: '11:00–21:30', delivery: false, petFriendly: false, content: { description: 'Kyoto\'s most respected tonkatsu restaurant — grind your own sesame at the table.', signature: 'Rosu katsu set + sesame sauce', reviews: [] } },
+  { id: 'biotei-kyoto', name: 'Biotei', lat: 35.0052, lng: 135.7670, type: 'local', cuisine: 'Vegetarian', price: '€€', openingHours: '11:30–14:30 (closed weekends)', delivery: false, petFriendly: false, content: { description: 'Kyoto\'s finest vegetarian lunch counter — Buddhist-inspired seasonal cuisine.', signature: 'Daily vegetarian bento', reviews: [] } },
+  { id: 'misoka-kawamichiya', name: 'Misoka-an Kawamichiya', lat: 35.0098, lng: 135.7736, type: 'local', cuisine: 'Soba', price: '€€', openingHours: '11:00–20:30 (closed Thu)', delivery: false, petFriendly: false, content: { description: 'Historic soba restaurant in a 300-year-old machiya — hand-cut buckwheat noodles.', signature: 'Nishin soba (herring soba)', reviews: [] } },
+  { id: 'gion-kappa', name: 'Gion Kappa', lat: 35.0042, lng: 135.7740, type: 'popular', cuisine: 'Kushikatsu', price: '€€', openingHours: '17:00–23:00 (closed Mon)', delivery: false, petFriendly: false, content: { description: 'Standing kushikatsu (deep-fried skewers) bar in Gion — no double dipping rule.', signature: 'Kushikatsu assortment + cold Sapporo', reviews: [] } },
+  { id: 'ippudo-kyoto', name: 'Ippudo Kyoto', lat: 35.0063, lng: 135.7614, type: 'popular', cuisine: 'Ramen', price: '€', openingHours: '11:00–23:00', delivery: false, petFriendly: false, content: { description: 'Fukuoka-style tonkotsu ramen in central Kyoto — rich pork bone broth.', signature: 'Shiromaru classic ramen', reviews: [] } },
+  { id: 'yoshikawa-kyoto', name: 'Yoshikawa', lat: 35.0087, lng: 135.7672, type: 'fine', cuisine: 'Tempura kaiseki', price: '€€€€', openingHours: '11:30–14:00, 17:30–21:00', delivery: false, petFriendly: false, content: { description: 'Counter tempura kaiseki in a serene garden setting — Kyoto at its most refined.', signature: 'Tempura kaiseki course', reviews: [] } },
+  { id: 'kakiden-kyoto', name: 'Kakiden', lat: 35.0107, lng: 135.7682, type: 'fine', cuisine: 'Kaiseki', price: '€€€€', openingHours: '12:00–14:30, 17:00–21:00', delivery: false, petFriendly: false, content: { description: 'Renowned kaiseki restaurant in central Kyoto — seasonal flavours, impeccable presentation.', signature: 'Seasonal kaiseki course', reviews: [] } },
+  { id: 'imahan-kyoto', name: 'Imahan', lat: 35.0072, lng: 135.7588, type: 'fine', cuisine: 'Sukiyaki/Shabu-shabu', price: '€€€€', openingHours: '11:30–21:00', delivery: false, petFriendly: false, content: { description: 'Premium wagyu sukiyaki and shabu-shabu in private tatami rooms.', signature: 'Wagyu sukiyaki set', reviews: [] } },
+];
+
+// ─── Hotels ───────────────────────────────────────────────────────────────────
+
+const hotels: {
+  id: string; name: string; lat: number; lng: number;
+  tier: HotelTier; area: string; pricePerNight: number; rating: string;
+  img: string; content: Record<string, unknown>;
+}[] = [
+  // Barcelona
+  { id: 'hotel-arts-bcn', name: 'Hotel Arts Barcelona', lat: 41.3866, lng: 2.1967, tier: 'comfort', area: 'Barceloneta', pricePerNight: 380, rating: '9.1', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Beachfront', 'Ritz-Carlton managed', 'Frank Gehry fish sculpture below'], amenities: ['Pool', 'Spa', 'Wi-Fi', 'Gym', 'Restaurant', 'Bar'], walkTo: '5 min to Barceloneta beach', roomTypes: [] } },
+  { id: 'w-barcelona', name: 'W Barcelona', lat: 41.3727, lng: 2.1885, tier: 'comfort', area: 'Port Olímpic', pricePerNight: 320, rating: '8.7', img: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800', content: { highlights: ['Sail-shaped tower', 'Wet deck pool', 'BRAVO24 rooftop restaurant'], amenities: ['Infinity pool', 'Spa', 'Wi-Fi', 'Gym', 'Restaurant'], walkTo: '2 min to beach', roomTypes: [] } },
+  { id: 'generator-bcn', name: 'Generator Barcelona', lat: 41.3941, lng: 2.1535, tier: 'budget', area: 'Gràcia', pricePerNight: 35, rating: '8.3', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Rooftop bar', 'Social atmosphere', 'Design hostel'], amenities: ['Wi-Fi', 'Bar', 'Communal kitchen'], walkTo: '10 min to Park Güell', roomTypes: [] } },
+  { id: 'praktik-rambla-bcn', name: 'Hotel Praktik Rambla', lat: 41.3809, lng: 2.1700, tier: 'mid', area: 'Las Ramblas', pricePerNight: 120, rating: '8.5', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Balconies over Las Ramblas', 'Modernista building', 'Central location'], amenities: ['Wi-Fi', 'Air conditioning', 'Restaurant'], walkTo: '5 min to Boqueria', roomTypes: [] } },
+  { id: 'motel-one-ciutadella-bcn', name: 'Motel One Barcelona-Ciutadella', lat: 41.3889, lng: 2.1863, tier: 'mid', area: 'El Born', pricePerNight: 110, rating: '8.6', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Design hotel at budget price', 'Near Ciudadela park', 'Rooftop bar'], amenities: ['Wi-Fi', 'Bar', 'Gym'], walkTo: '10 min to Barceloneta', roomTypes: [] } },
+  { id: 'catalonia-born-bcn', name: 'Catalonia Born', lat: 41.3862, lng: 2.1818, tier: 'mid', area: 'El Born', pricePerNight: 140, rating: '8.8', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Pool on roof terrace', 'El Born neighbourhood', 'Historic building'], amenities: ['Pool', 'Wi-Fi', 'Gym', 'Restaurant'], walkTo: '5 min to Picasso Museum', roomTypes: [] } },
+  { id: 'equity-point-gothic-bcn', name: 'Equity Point Gothic', lat: 41.3831, lng: 2.1774, tier: 'budget', area: 'Gothic Quarter', pricePerNight: 28, rating: '7.9', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Best location in the Gothic Quarter', 'Rooftop terrace'], amenities: ['Wi-Fi', 'Communal kitchen', 'Terrace'], walkTo: '2 min to Cathedral', roomTypes: [] } },
+  { id: 'casa-camper-bcn', name: 'Hotel Casa Camper', lat: 41.3826, lng: 2.1731, tier: 'comfort', area: 'Raval', pricePerNight: 280, rating: '8.9', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Free 24h snack bar', 'Unique split-level rooms', 'Sustainable design'], amenities: ['Wi-Fi', 'Free snack bar', 'Gym'], walkTo: '5 min to Boqueria', roomTypes: [] } },
+  { id: 'h10-marina-bcn', name: 'H10 Marina Barcelona', lat: 41.3940, lng: 2.1975, tier: 'mid', area: 'Poblenou', pricePerNight: 160, rating: '8.7', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Rooftop pool', 'Near Rambla del Poblenou', 'Port views'], amenities: ['Pool', 'Wi-Fi', 'Gym', 'Restaurant'], walkTo: '10 min to beach', roomTypes: [] } },
+  { id: 'chic-basic-born-bcn', name: 'Chic&Basic Born', lat: 41.3853, lng: 2.1820, tier: 'budget', area: 'El Born', pricePerNight: 65, rating: '8.2', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', content: { highlights: ['Trendy El Born location', 'LED mood lighting rooms', 'Patio'], amenities: ['Wi-Fi', 'Air conditioning'], walkTo: '3 min to Picasso Museum', roomTypes: [] } },
+
+  // Lisbon
+  { id: 'bairro-alto-hotel', name: 'Bairro Alto Hotel', lat: 38.7111, lng: -9.1433, tier: 'comfort', area: 'Chiado', pricePerNight: 350, rating: '9.3', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Panoramic rooftop bar', 'Walking distance to everything', 'Contemporary design'], amenities: ['Spa', 'Wi-Fi', 'Gym', 'Restaurant', 'Rooftop bar'], walkTo: '5 min to LX Factory tram', roomTypes: [] } },
+  { id: 'lumiares-lisbon', name: 'The Lumiares Hotel', lat: 38.7121, lng: -9.1453, tier: 'comfort', area: 'Bairro Alto', pricePerNight: 280, rating: '9.0', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Apartment-style suites', 'Views over Lisbon', '18th-century building'], amenities: ['Pool', 'Wi-Fi', 'Restaurant'], walkTo: '5 min to Miradouro de São Pedro', roomTypes: [] } },
+  { id: 'lisbon-destination-hostel', name: 'Lisbon Destination Hostel', lat: 38.7117, lng: -9.1392, tier: 'budget', area: 'Rossio', pricePerNight: 25, rating: '9.2', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Inside Rossio train station', 'Rooftop terrace', 'Top-rated hostel in Europe'], amenities: ['Wi-Fi', 'Terrace', 'Communal kitchen'], walkTo: '10 min to Alfama on foot', roomTypes: [] } },
+  { id: 'hotel-avenida-palace', name: 'Hotel Avenida Palace', lat: 38.7153, lng: -9.1415, tier: 'comfort', area: 'Baixa', pricePerNight: 240, rating: '8.8', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Belle Époque building (1892)', 'Inside Rossio station', 'Ballroom events'], amenities: ['Wi-Fi', 'Restaurant', 'Bar'], walkTo: '5 min to Praça do Comércio', roomTypes: [] } },
+  { id: 'my-story-ouro', name: 'MY Story Hotel Ouro', lat: 38.7143, lng: -9.1383, tier: 'mid', area: 'Baixa', pricePerNight: 110, rating: '8.5', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Central Baixa location', 'Modern design', 'Rooftop'], amenities: ['Wi-Fi', 'Air conditioning', 'Rooftop'], walkTo: '2 min to Praça do Comércio', roomTypes: [] } },
+  { id: 'hotel-do-chiado', name: 'Hotel do Chiado', lat: 38.7112, lng: -9.1427, tier: 'mid', area: 'Chiado', pricePerNight: 190, rating: '8.7', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Rooftop bar with castle views', 'Pombaline building', 'Chiado centre'], amenities: ['Wi-Fi', 'Rooftop bar', 'Restaurant'], walkTo: '5 min to Bairro Alto', roomTypes: [] } },
+  { id: 'memmo-alfama', name: 'Memmo Alfama', lat: 38.7129, lng: -9.1306, tier: 'comfort', area: 'Alfama', pricePerNight: 310, rating: '9.1', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Terraced pool with Tejo views', 'In the heart of Alfama', 'Adults only'], amenities: ['Pool', 'Wi-Fi', 'Restaurant', 'Bar'], walkTo: '5 min to São Jorge Castle', roomTypes: [] } },
+  { id: 'selina-secret-garden', name: 'Selina Secret Garden Lisbon', lat: 38.7139, lng: -9.1467, tier: 'budget', area: 'Bairro Alto', pricePerNight: 40, rating: '8.1', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Co-working space', 'Secret courtyard garden', 'Surf-hostel vibe'], amenities: ['Wi-Fi', 'Co-working', 'Bar', 'Garden'], walkTo: '5 min to Bica funicular', roomTypes: [] } },
+  { id: 'turim-lisboa', name: 'Turim Lisboa Hotel', lat: 38.7181, lng: -9.1378, tier: 'mid', area: 'Avenida', pricePerNight: 130, rating: '8.3', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Near Avenida da Liberdade', 'Quiet side street', 'Good value'], amenities: ['Wi-Fi', 'Gym', 'Restaurant'], walkTo: '10 min to Chiado', roomTypes: [] } },
+  { id: 'casa-amora-lisbon', name: 'Casa Amora', lat: 38.7133, lng: -9.1440, tier: 'budget', area: 'Bairro Alto', pricePerNight: 70, rating: '8.6', img: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=800', content: { highlights: ['Boutique guesthouse', 'Home-like atmosphere', 'Azulejo tiles'], amenities: ['Wi-Fi', 'Terrace'], walkTo: '3 min to Miradouro de São Pedro', roomTypes: [] } },
+
+  // Rome
+  { id: 'hotel-de-russie-rome', name: 'Hotel de Russie', lat: 41.9062, lng: 12.4790, tier: 'comfort', area: 'Piazza del Popolo', pricePerNight: 550, rating: '9.5', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Terraced garden', 'Le Jardin de Russie restaurant', 'Spa Rocco Forte'], amenities: ['Pool', 'Spa', 'Wi-Fi', 'Gym', 'Restaurant'], walkTo: '5 min to Piazza del Popolo', roomTypes: [] } },
+  { id: 'first-roma-arte', name: 'The First Roma Arte', lat: 41.9077, lng: 12.4806, tier: 'comfort', area: 'Via Veneto', pricePerNight: 320, rating: '9.0', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Rooftop with Borghese views', 'Art gallery hotel', 'ACQUA restaurant'], amenities: ['Rooftop', 'Wi-Fi', 'Gym', 'Restaurant'], walkTo: '10 min to Spanish Steps', roomTypes: [] } },
+  { id: 'hotel-campo-fiori-rome', name: 'Hotel Campo de\' Fiori', lat: 41.8965, lng: 12.4726, tier: 'mid', area: 'Centro Storico', pricePerNight: 160, rating: '8.5', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Rooftop terrace over Campo de\' Fiori', 'Medieval building', 'Steps from Pantheon'], amenities: ['Terrace', 'Wi-Fi'], walkTo: '5 min to Campo de\' Fiori', roomTypes: [] } },
+  { id: 'hotel-panda-rome', name: 'Hotel Panda', lat: 41.9052, lng: 12.4818, tier: 'budget', area: 'Spagna', pricePerNight: 60, rating: '7.8', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Steps from Spanish Steps', 'Clean and simple', 'Best location for price'], amenities: ['Wi-Fi', 'Air conditioning'], walkTo: '2 min to Spanish Steps', roomTypes: [] } },
+  { id: 'mama-shelter-rome', name: 'Mama Shelter Roma', lat: 41.8953, lng: 12.5018, tier: 'mid', area: 'Pigneto', pricePerNight: 140, rating: '8.6', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Trendy Pigneto neighbourhood', 'Rooftop pool', 'Quirky design'], amenities: ['Pool', 'Wi-Fi', 'Restaurant', 'Bar'], walkTo: '20 min to Colosseum by metro', roomTypes: [] } },
+  { id: 'hotel-santa-maria-trastevere', name: 'Hotel Santa Maria', lat: 41.8875, lng: 12.4694, tier: 'mid', area: 'Trastevere', pricePerNight: 150, rating: '8.8', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Orange tree courtyard', 'In the heart of Trastevere', '16th-century convent'], amenities: ['Wi-Fi', 'Courtyard', 'Bikes'], walkTo: '2 min to Piazza Santa Maria', roomTypes: [] } },
+  { id: 'ostello-bello-rome', name: 'Ostello Bello Roma', lat: 41.8977, lng: 12.4869, tier: 'budget', area: 'Termini', pricePerNight: 30, rating: '9.0', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Free dinner included', 'Social community hostel', 'Central Termini'], amenities: ['Wi-Fi', 'Free dinner', 'Bar', 'Communal kitchen'], walkTo: '2 min to Termini station', roomTypes: [] } },
+  { id: 'portrait-roma', name: 'Portrait Roma', lat: 41.9008, lng: 12.4798, tier: 'comfort', area: 'Piazza di Spagna', pricePerNight: 680, rating: '9.6', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Salvatore Ferragamo property', 'Rooftop bar over Spanish Steps', 'Suite-only'], amenities: ['Rooftop', 'Wi-Fi', 'Concierge', 'Room service'], walkTo: '1 min to Spanish Steps', roomTypes: [] } },
+  { id: 'hotel-adriano-rome', name: 'Hotel Adriano', lat: 41.9003, lng: 12.4761, tier: 'mid', area: 'Pantheon', pricePerNight: 175, rating: '8.7', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Rooftop terrace', 'Pantheon steps away', 'Historic palazzo'], amenities: ['Terrace', 'Wi-Fi', 'Air conditioning'], walkTo: '2 min to Pantheon', roomTypes: [] } },
+  { id: 'fortyseven-rome', name: 'Fortyseven Hotel', lat: 41.8924, lng: 12.4835, tier: 'mid', area: 'Aventino', pricePerNight: 155, rating: '8.9', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800', content: { highlights: ['Rooftop with Palatine Hill views', 'Aventino quiet street', 'Contemporary design'], amenities: ['Rooftop', 'Wi-Fi', 'Restaurant'], walkTo: '10 min to Colosseum', roomTypes: [] } },
+
+  // Paris
+  { id: 'hotel-plaza-athenee', name: 'Hôtel Plaza Athénée', lat: 48.8650, lng: 2.3025, tier: 'comfort', area: 'Champs-Élysées', pricePerNight: 950, rating: '9.4', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Alain Ducasse restaurant', 'Iconic red geranium facade', 'Dior Institut Spa'], amenities: ['Spa', 'Wi-Fi', 'Gym', 'Restaurant', 'Bar'], walkTo: '5 min to Eiffel Tower by car', roomTypes: [] } },
+  { id: 'generator-paris', name: 'Generator Paris', lat: 48.8790, lng: 2.3685, tier: 'budget', area: 'Belleville', pricePerNight: 35, rating: '8.2', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Rooftop bar', 'Design hostel', 'Near Canal Saint-Martin'], amenities: ['Wi-Fi', 'Rooftop bar', 'Restaurant'], walkTo: '20 min to Marais by metro', roomTypes: [] } },
+  { id: 'hotel-du-temps-paris', name: 'Hôtel du Temps', lat: 48.8714, lng: 2.3481, tier: 'mid', area: 'Montmartre', pricePerNight: 130, rating: '8.6', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Vintage design', 'Near Sacré-Cœur', 'Quiet Montmartre street'], amenities: ['Wi-Fi', 'Bar'], walkTo: '10 min to Sacré-Cœur', roomTypes: [] } },
+  { id: 'mama-shelter-east-paris', name: 'Mama Shelter Paris East', lat: 48.8641, lng: 2.3851, tier: 'mid', area: 'Gambetta', pricePerNight: 120, rating: '8.7', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Philippe Starck design', 'Rooftop terrace', 'Pizza restaurant'], amenities: ['Wi-Fi', 'Gym', 'Restaurant', 'Rooftop'], walkTo: '15 min to Marais by metro', roomTypes: [] } },
+  { id: 'hotel-duo-paris', name: 'Hôtel Duo', lat: 48.8563, lng: 2.3548, tier: 'mid', area: 'Marais', pricePerNight: 165, rating: '8.8', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Best Marais location', 'Modern design', 'Near Centre Pompidou'], amenities: ['Gym', 'Wi-Fi', 'Bar'], walkTo: '5 min to Centre Pompidou', roomTypes: [] } },
+  { id: 'mije-hostels-paris', name: 'MIJE Marais', lat: 48.8558, lng: 2.3573, tier: 'budget', area: 'Marais', pricePerNight: 40, rating: '8.0', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['17th-century hôtel particulier', 'Marais heart', 'Courtyard breakfasts'], amenities: ['Wi-Fi', 'Courtyard', 'Breakfast'], walkTo: '5 min to Place des Vosges', roomTypes: [] } },
+  { id: 'la-louisiane-paris', name: 'La Louisiane', lat: 48.8541, lng: 2.3355, tier: 'budget', area: 'Saint-Germain', pricePerNight: 85, rating: '7.8', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Existentialist history (Camus, de Beauvoir)', 'Saint-Germain centre', 'Good value'], amenities: ['Wi-Fi', 'Air conditioning'], walkTo: '3 min to Café de Flore', roomTypes: [] } },
+  { id: 'grands-boulevards-paris', name: 'Hôtel des Grands Boulevards', lat: 48.8669, lng: 2.3459, tier: 'comfort', area: 'Grands Boulevards', pricePerNight: 280, rating: '9.1', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Rooftop garden bar', 'Napoleon III building', 'Restaurant Michelin-recommended'], amenities: ['Rooftop', 'Wi-Fi', 'Restaurant', 'Bar'], walkTo: '10 min to Marais', roomTypes: [] } },
+  { id: 'hotel-praktik-paris', name: 'Hôtel Praktik Vinoteca', lat: 48.8539, lng: 2.3371, tier: 'mid', area: 'Saint-Germain', pricePerNight: 140, rating: '8.4', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Wine hotel concept', 'Natural wine bar on-site', 'Saint-Germain location'], amenities: ['Wine bar', 'Wi-Fi', 'Air conditioning'], walkTo: '5 min to Musée d\'Orsay', roomTypes: [] } },
+  { id: 'peninsula-paris', name: 'The Peninsula Paris', lat: 48.8733, lng: 2.2992, tier: 'comfort', area: 'Kléber', pricePerNight: 1100, rating: '9.7', img: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800', content: { highlights: ['Rooftop pool + restaurant', 'Haussmann architecture', 'Best service in Paris'], amenities: ['Pool', 'Spa', 'Wi-Fi', 'Gym', 'Restaurant', 'Rooftop'], walkTo: '8 min walk to Arc de Triomphe', roomTypes: [] } },
+
+  // Kyoto
+  { id: 'ritz-carlton-kyoto', name: 'The Ritz-Carlton Kyoto', lat: 35.0105, lng: 135.7726, tier: 'comfort', area: 'Nakagyo', pricePerNight: 700, rating: '9.5', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Kamogawa River views', 'Traditional kaiseki restaurant', 'Hinoki wood bathtubs'], amenities: ['Spa', 'Pool', 'Wi-Fi', 'Gym', 'Restaurant'], walkTo: '10 min to Gion', roomTypes: [] } },
+  { id: 'hotel-granvia-kyoto', name: 'Hotel Granvia Kyoto', lat: 35.0116, lng: 135.7581, tier: 'mid', area: 'Kyoto Station', pricePerNight: 160, rating: '8.6', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Inside Kyoto Station', 'Bullet train access', 'Multiple restaurants'], amenities: ['Wi-Fi', 'Gym', 'Restaurant', 'Bar'], walkTo: 'Direct access to Kyoto Station', roomTypes: [] } },
+  { id: 'piece-hostel-sanjo', name: 'Piece Hostel Sanjo', lat: 35.0073, lng: 135.7654, tier: 'budget', area: 'Nakagyo', pricePerNight: 30, rating: '8.9', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Central location near Nishiki', 'Excellent common room', 'Bike rental'], amenities: ['Wi-Fi', 'Communal kitchen', 'Bike rental'], walkTo: '5 min to Nishiki Market', roomTypes: [] } },
+  { id: 'mitsui-garden-kyoto', name: 'Mitsui Garden Hotel Kyoto Shinmachi Bettei', lat: 35.0097, lng: 135.7601, tier: 'mid', area: 'Shijo', pricePerNight: 130, rating: '8.7', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Traditional machiya design', 'Public bath (sento)', 'Central Shijo location'], amenities: ['Sento', 'Wi-Fi', 'Restaurant'], walkTo: '5 min to Nishiki Market', roomTypes: [] } },
+  { id: 'kyoto-tower-annex', name: 'Kyoto Tower Hotel Annex', lat: 35.0100, lng: 135.7577, tier: 'budget', area: 'Kyoto Station', pricePerNight: 55, rating: '8.1', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Walk to Kyoto Station', 'Compact but clean', 'Good for JR Pass holders'], amenities: ['Wi-Fi', 'Air conditioning'], walkTo: '5 min to Kyoto Station', roomTypes: [] } },
+  { id: 'hyatt-regency-kyoto', name: 'Hyatt Regency Kyoto', lat: 34.9949, lng: 135.7750, tier: 'comfort', area: 'Higashiyama', pricePerNight: 380, rating: '9.2', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Near Kiyomizu-dera', 'Outdoor garden', 'Touzan restaurant (Japanese)'], amenities: ['Spa', 'Pool', 'Wi-Fi', 'Gym', 'Restaurant'], walkTo: '10 min to Kiyomizu-dera', roomTypes: [] } },
+  { id: 'gion-hatanaka', name: 'Gion Hatanaka', lat: 35.0040, lng: 135.7743, tier: 'comfort', area: 'Gion', pricePerNight: 500, rating: '9.4', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Authentic ryokan in Gion', 'Kaiseki dinner included', 'Geisha evening possible'], amenities: ['Wi-Fi', 'Full board available', 'Private onsen'], walkTo: '2 min to Gion main street', roomTypes: [] } },
+  { id: 'daiwa-roynet-kyoto', name: 'Daiwa Roynet Hotel Kyoto-Hachijo', lat: 35.0113, lng: 135.7579, tier: 'mid', area: 'Kyoto Station', pricePerNight: 110, rating: '8.5', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Business hotel efficiency', 'Walk to Kyoto Station', 'Clean and modern'], amenities: ['Wi-Fi', 'Gym', 'Restaurant'], walkTo: '5 min to Kyoto Station', roomTypes: [] } },
+  { id: 'piece-hostel-kyoto', name: 'Piece Hostel Kyoto', lat: 35.0090, lng: 135.7558, tier: 'budget', area: 'Gojo', pricePerNight: 25, rating: '8.7', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Second Piece property — more local feel', 'Quiet neighbourhood', 'Bike rental'], amenities: ['Wi-Fi', 'Communal kitchen', 'Bike rental'], walkTo: '15 min to Nishiki by bike', roomTypes: [] } },
+  { id: 'hotel-kanra-kyoto', name: 'Hotel Kanra Kyoto', lat: 35.0005, lng: 135.7619, tier: 'mid', area: 'Shimogyo', pricePerNight: 145, rating: '8.9', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Modern machiya aesthetic', 'Tatami areas in rooms', 'In-house Japanese restaurant'], amenities: ['Wi-Fi', 'Restaurant', 'Tatami rooms'], walkTo: '10 min to Nishiki Market', roomTypes: [] } },
+];
+
+// ─── Geo-matching helper ──────────────────────────────────────────────────────
+
+async function recomputeAll(): Promise<void> {
+  console.log('\nComputing geo-matches...');
+
+  const destinationRows = await prisma.destination.findMany({
+    select: { id: true, lat: true, lng: true, radiusKm: true },
+  });
+
+  const attractionRows = await prisma.attraction.findMany({
+    select: { id: true, lat: true, lng: true },
+  });
+  const restaurantRows = await prisma.restaurant.findMany({
+    select: { id: true, lat: true, lng: true },
+  });
+  const hotelRows = await prisma.hotel.findMany({
+    select: { id: true, lat: true, lng: true },
+  });
+
+  for (const dest of destinationRows) {
+    if (dest.lat == null || dest.lng == null) continue;
+
+    const matchingAttractions = attractionRows.filter(
+      (a) => haversineDistanceKm(dest.lat!, dest.lng!, a.lat, a.lng) <= dest.radiusKm,
+    );
+    const matchingRestaurants = restaurantRows.filter(
+      (r) => haversineDistanceKm(dest.lat!, dest.lng!, r.lat, r.lng) <= dest.radiusKm,
+    );
+    const matchingHotels = hotelRows.filter(
+      (h) => haversineDistanceKm(dest.lat!, dest.lng!, h.lat, h.lng) <= dest.radiusKm,
+    );
+
+    await prisma.destinationAttraction.deleteMany({ where: { destinationId: dest.id } });
+    await prisma.destinationRestaurant.deleteMany({ where: { destinationId: dest.id } });
+    await prisma.destinationHotel.deleteMany({ where: { destinationId: dest.id } });
+
+    if (matchingAttractions.length > 0) {
+      await prisma.destinationAttraction.createMany({
+        data: matchingAttractions.map((a) => ({ destinationId: dest.id, attractionId: a.id })),
+        skipDuplicates: true,
+      });
+    }
+    if (matchingRestaurants.length > 0) {
+      await prisma.destinationRestaurant.createMany({
+        data: matchingRestaurants.map((r) => ({ destinationId: dest.id, restaurantId: r.id })),
+        skipDuplicates: true,
+      });
+    }
+    if (matchingHotels.length > 0) {
+      await prisma.destinationHotel.createMany({
+        data: matchingHotels.map((h) => ({ destinationId: dest.id, hotelId: h.id })),
+        skipDuplicates: true,
+      });
+    }
+
+    console.log(
+      `  ✓ ${dest.id}: ${matchingAttractions.length} attractions, ` +
+      `${matchingRestaurants.length} restaurants, ${matchingHotels.length} hotels`,
+    );
+  }
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
 async function main() {
   console.log('Seeding destinations...');
-
   for (const destination of destinations) {
     await prisma.destination.upsert({
       where: { id: destination.id },
@@ -335,7 +433,45 @@ async function main() {
     console.log(`  ✓ ${destination.name}`);
   }
 
-  console.log(`\nDone. Seeded ${destinations.length} destinations.`);
+  console.log('\nSeeding attractions...');
+  for (const attraction of attractions) {
+    await prisma.attraction.upsert({
+      where: { id: attraction.id },
+      update: attraction,
+      create: attraction,
+    });
+    console.log(`  ✓ ${attraction.name}`);
+  }
+
+  console.log('\nSeeding restaurants...');
+  for (const restaurant of restaurants) {
+    await prisma.restaurant.upsert({
+      where: { id: restaurant.id },
+      update: restaurant,
+      create: restaurant,
+    });
+    console.log(`  ✓ ${restaurant.name}`);
+  }
+
+  console.log('\nSeeding hotels...');
+  for (const hotel of hotels) {
+    await prisma.hotel.upsert({
+      where: { id: hotel.id },
+      update: hotel,
+      create: hotel,
+    });
+    console.log(`  ✓ ${hotel.name}`);
+  }
+
+  await recomputeAll();
+
+  console.log(`
+Done.
+  Destinations:  ${destinations.length}
+  Attractions:   ${attractions.length}
+  Restaurants:   ${restaurants.length}
+  Hotels:        ${hotels.length}
+`);
 }
 
 main()
