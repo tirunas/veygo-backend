@@ -9,7 +9,9 @@ import {
   AttractionPin,
   FoodSpotPin,
   MapData,
+  DestinationSearchResult,
 } from './destinations.types';
+import { SearchDestinationsDto } from './dto/search-destinations.dto';
 import {
   DEST_LIST_KEY,
   DEST_LIST_TTL,
@@ -139,5 +141,64 @@ export class DestinationsService {
     void createdAt;
     void updatedAt;
     return summary;
+  }
+
+  async search(dto: SearchDestinationsDto): Promise<DestinationSearchResult[]> {
+    const styles = dto.styles ? dto.styles.split(',').filter(Boolean) : undefined;
+    const months = dto.months ? dto.months.split(',').filter(Boolean) : undefined;
+
+    let records = await this.destinationsRepository.search(dto.q, styles);
+
+    if (dto.maxBudget !== undefined) {
+      records = records.filter(
+        (r) => (r.content.minDailyBudget ?? 0) <= dto.maxBudget!,
+      );
+    }
+
+    if (dto.maxFlightH !== undefined) {
+      records = records.filter(
+        (r) => (r.content.flightHours ?? 0) <= dto.maxFlightH!,
+      );
+    }
+
+    if (months?.length) {
+      records = records.filter((r) => {
+        const weatherData = (r.content as any).weather as
+          | Array<{ month: string; quality: string }>
+          | undefined;
+        if (!weatherData) return false;
+        return weatherData.some(
+          (w) => months.includes(w.month) && w.quality === 'best',
+        );
+      });
+    }
+
+    if (dto.weather) {
+      records = records.filter((r) => {
+        const match = r.currentWeather?.match(/\d+/);
+        if (!match) return true;
+        const temp = parseInt(match[0], 10);
+        if (isNaN(temp)) return true;
+        return dto.weather === 'warm' ? temp >= 20 : temp < 20;
+      });
+    }
+
+    return records.map((r) => this.toSearchResult(r));
+  }
+
+  private toSearchResult(record: DestinationRecord): DestinationSearchResult {
+    return {
+      id: record.id,
+      name: record.name,
+      country: record.country,
+      styles: record.styles,
+      bestSeason: record.bestSeason,
+      imgUrl: record.imgUrl,
+      heroImageUrl: record.heroImageUrl,
+      currentWeather: record.currentWeather,
+      minDailyBudget: record.content.minDailyBudget ?? 0,
+      flightHours: record.content.flightHours ?? 0,
+      startingPrice: record.content.startingPrice ?? 0,
+    };
   }
 }

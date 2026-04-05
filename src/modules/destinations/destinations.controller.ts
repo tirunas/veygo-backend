@@ -1,9 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator';
 import { DestinationsService } from './destinations.service';
+import { searchDestinationsSchema } from './dto/search-destinations.dto';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type {
   DestinationSummary,
   DestinationRecord,
+  DestinationSearchResult,
   AttractionPin,
   FoodSpotPin,
   MapData,
@@ -17,6 +20,13 @@ export class DestinationsController {
   @Get()
   async findAll(): Promise<DestinationSummary[]> {
     return this.destinationsService.findAll();
+  }
+
+  @Get('search')
+  async search(
+    @Query(new ZodValidationPipe(searchDestinationsSchema)) dto: any,
+  ): Promise<DestinationSearchResult[]> {
+    return this.destinationsService.search(dto);
   }
 
   @Get(':id')
