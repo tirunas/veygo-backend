@@ -471,12 +471,329 @@ async function main() {
 
   await recomputeAll();
 
+  // ── Experiences ───────────────────────────────────────────────────────────────
+  const experiences = [
+    {
+      id: 'bunkers-del-carmel-barselona',
+      destinationId: 'barcelona',
+      title: 'Bunkers del Carmel saulėlydis',
+      subtitle: 'Geriausia Barselonos panorama su vietiniais',
+      category: 'Vaizdai',
+      heroImgUrl: 'https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=800&q=80',
+      price: 'Nemokamai',
+      duration: '2–3 val.',
+      tags: ['Romantika', 'Vakaras', 'Panorama'],
+      content: {
+        description: 'Bunkers del Carmel yra buvusi priešlėktuvinės gynybos zona, siūlanti geriausią 360° Barselonos panoramą.',
+        highlights: ['360° panorama', 'Populiari tarp vietinių', 'Geriausia saulėlydžio vieta'],
+        insiderTip: 'Ateikite likus 1 valandai iki saulėlydžio ir atsineškite vyno bei snackų.',
+        bestTime: 'Vakaras (18:00–21:00)',
+      },
+    },
+    {
+      id: 'sagrada-familia-early',
+      destinationId: 'barcelona',
+      title: 'Sagrada Família 9:00 ryte',
+      subtitle: 'Be eilių, be turistų minios',
+      category: 'Architektūra',
+      heroImgUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&q=80',
+      price: '€26–€36',
+      duration: '2 val.',
+      tags: ['Architektūra', 'Rytas', 'Kultūra'],
+      content: {
+        description: 'Gaudí šedevras — viena lankomiausiųjų turistinių vietų pasaulyje. Lankykitės anksti ryte, kad išvengtumėte eilių.',
+        highlights: ['Ankstyvojo lankymo privalumas', 'Gaudí genialumas', 'Vitražai ryto šviesoje'],
+        insiderTip: 'Rezervuokite bilietą internetu iš anksto. Pasirinkite 9:00 laiko tarpsnį.',
+        bestTime: 'Rytas (9:00–11:00)',
+      },
+    },
+    {
+      id: 'sintra-day-trip',
+      destinationId: 'lisbon',
+      title: 'Sintra dieninė ekskursija',
+      subtitle: '8:08 traukinys — pilys be eilių',
+      category: 'Gamta',
+      heroImgUrl: 'https://images.unsplash.com/photo-1536663815808-535e2280d2c2?w=800&q=80',
+      price: '€5 traukinys + €15–€20 bilietai',
+      duration: 'Visa diena',
+      tags: ['Pilis', 'Gamta', 'Dieninė ekskursija'],
+      content: {
+        description: 'Sintra — pasakiška miestelis, pilna romantiškų pilių ir sodų, vos 40 minučių nuo Lisabonos.',
+        highlights: ['Pena pilis', 'Moorų pilis', 'Quinta da Regaleira'],
+        insiderTip: 'Sėskite į 8:08 traukinį iš Rossio stoties. Grįžkite 17:00 prieš turistų antplūdį.',
+        bestTime: 'Rytas (8:00–12:00)',
+      },
+    },
+    {
+      id: 'marrakech-medina-walk',
+      destinationId: 'marrakech',
+      title: 'Medinų klajojimas su vietiniu',
+      subtitle: 'Slaptieji Marakešo turgai',
+      category: 'Kultūra',
+      heroImgUrl: 'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?w=800&q=80',
+      price: '€20–€30',
+      duration: '3–4 val.',
+      tags: ['Kultūra', 'Turgus', 'Autentiška'],
+      content: {
+        description: 'Pasivaikščiokite po senovines Marakešo medinas su vietiniu gidu, kuris žino visus slaptus praėjimus.',
+        highlights: ['Slaptieji turgai', 'Tradiciniai amatai', 'Autentiška virtuvė'],
+        insiderTip: 'Prašykite gido nuvesti prie neturistiniu restoranų. Derėkitės maloniai.',
+        bestTime: 'Rytas (9:00–13:00)',
+      },
+    },
+    {
+      id: 'paris-morning-market',
+      destinationId: 'paris',
+      title: 'Paryžiaus ryto turgus',
+      subtitle: 'Rue Mouffetard su vietiniais',
+      category: 'Maistas',
+      heroImgUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
+      price: 'Nemokamai (produktai pagal poreikį)',
+      duration: '1–2 val.',
+      tags: ['Maistas', 'Rytas', 'Vietiniai'],
+      content: {
+        description: 'Rue Mouffetard — vienas seniausių Paryžiaus turgų, kur vietiniai perka šviežius produktus kiekvieną rytą.',
+        highlights: ['Šviežios kepyklos', 'Vietiniai sūriai', 'Paryžietiškas rytinis gyvenimas'],
+        insiderTip: 'Ateikite 8:00–10:00. Pirkite croissant iš Boulangerie Eric Kayser.',
+        bestTime: 'Rytas (8:00–10:00)',
+      },
+    },
+  ];
+
+  for (const experience of experiences) {
+    await prisma.experience.upsert({
+      where: { id: experience.id },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      update: experience as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: experience as any,
+    });
+  }
+
+  // ── Testimonials ──────────────────────────────────────────────────────────────
+  const testimonials = [
+    {
+      id: 'lina-barcelona',
+      text: '"Barselona be turistų minios yra įmanoma! Mūsų Gaudí maršrutas prasidėjo 8:00 ryte — Sagrada Família beveik tuščia. Sutaupėme ~€80 lyginant su standartiniais turais."',
+      author: 'Lina M.',
+      city: 'Vilnius',
+      initials: 'LM',
+      colorHex: '#E8734A',
+      destinationName: 'Barselona',
+      tripDate: '2025 m. liepa',
+      highlight: 'Sagrada Família be eilių',
+      savedAmount: '~€80',
+    },
+    {
+      id: 'tomas-marrakech',
+      text: '"Marakešas be streso — tai įmanoma su Veygo. Riad viešbutis 10x geresnis nei tas, kurį radau Booking, ir pigiau. Visi slaptieji turgai, kuriuos rekomendavo, buvo tikri."',
+      author: 'Tomas K.',
+      city: 'Kaunas',
+      initials: 'TK',
+      colorHex: '#1A5C57',
+      destinationName: 'Marakešas',
+      tripDate: '2025 m. lapkritis',
+      highlight: 'Riad viešbutis 10x geresnis nei Booking',
+      savedAmount: '~€100',
+    },
+    {
+      id: 'giedre-lisbon',
+      text: '"28 tramvajus 8:00 ryte — buvome vieni. Sintra pilys be eilių. Pastéis de Belém tiesiog iš kepyklos. Viskas buvo suplanuota iki minutės."',
+      author: 'Giedrė S.',
+      city: 'Klaipėda',
+      initials: 'GS',
+      colorHex: '#3B82F6',
+      destinationName: 'Lisabona',
+      tripDate: '2025 m. spalis',
+      highlight: 'Sintra pilys be eilių',
+      savedAmount: null,
+    },
+    {
+      id: 'jonas-paris',
+      text: '"Paryžius be eilių prie Eifelio bokšto — stebuklas. Slaptų kavinukų sąrašas buvo vertingesnis nei bet kokia kelionių knyga. Rekomenduosiu visiems draugams."',
+      author: 'Jonas M.',
+      city: 'Šiauliai',
+      initials: 'JM',
+      colorHex: '#D97706',
+      destinationName: 'Paryžius',
+      tripDate: '2025 m. gegužė',
+      highlight: 'Eifelio bokštas be eilių',
+      savedAmount: '~€150',
+    },
+    {
+      id: 'ruta-rome',
+      text: '"Roma be turistų minios yra įmanoma! Vatikano muziejus 8:00 ryte — beveik tušti koridoriai. Graikų restoranas Trastevere — vertas kiekvieno euro."',
+      author: 'Rūta P.',
+      city: 'Panevėžys',
+      initials: 'RP',
+      colorHex: '#059669',
+      destinationName: 'Roma',
+      tripDate: '2025 m. kovas',
+      highlight: 'Vatikanas beveik be eilių',
+      savedAmount: '~€200',
+    },
+    {
+      id: 'andrius-kyoto',
+      text: '"Kioto sakurų sezonu — ir nė vieno traukinio vėlavimo. Vietinių rekomenduoti ryžių laukai Arashiyama vietoj bambukyno — geras patarimas, sutaupė 2 valandas eilėje."',
+      author: 'Andrius B.',
+      city: 'Vilnius',
+      initials: 'AB',
+      colorHex: '#C2755C',
+      destinationName: 'Kijotas',
+      tripDate: '2025 m. balandis',
+      highlight: 'Arashiyama be eilių',
+      savedAmount: null,
+    },
+  ];
+
+  for (const testimonial of testimonials) {
+    await prisma.testimonial.upsert({
+      where: { id: testimonial.id },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      update: testimonial as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: testimonial as any,
+    });
+  }
+
+  // ── Ready Plans ───────────────────────────────────────────────────────────────
+  const itin1 = await prisma.itinerary.upsert({
+    where: { id: 'itin-vasara-barselona' },
+    update: {},
+    create: {
+      id: 'itin-vasara-barselona',
+      title: 'Vasaros savaitgalis Barselonoje',
+      days: [
+        { day: 1, activities: ['Gaudí maršrutas: Casa Batlló ir La Pedrera', 'Vakariena El Born kvartale'] },
+        { day: 2, activities: ['Sagrada Família (iš anksto rezervuoti bilietai)', 'Park Güell saulėlydis'] },
+        { day: 3, activities: ['Barceloneta paplūdimys', 'Tapasai La Boqueria turguje'] },
+        { day: 4, activities: ['Montjuïc pilis', 'Skrydis namo'] },
+      ],
+      costs: { flights: 180, hotel: 320, food: 160, transport: 40, activities: 80 },
+    },
+  });
+
+  await prisma.readyPlan.upsert({
+    where: { id: 'vasara-barselona' },
+    update: {},
+    create: {
+      id: 'vasara-barselona',
+      itineraryId: itin1.id,
+      title: 'Vasaros savaitgalis Barselonoje',
+      subtitle: '4 dienos · Liepa 3–7, 2026',
+      price: 999,
+      imgUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600&q=80',
+      badge: 'Populiarus',
+      tags: ['Poroms', 'Vasara', 'Paplūdimys'],
+      isPublished: true,
+    },
+  });
+
+  const itin2 = await prisma.itinerary.upsert({
+    where: { id: 'itin-naujieji-lisabona' },
+    update: {},
+    create: {
+      id: 'itin-naujieji-lisabona',
+      title: 'Naujieji metai Lisabonoje',
+      days: [
+        { day: 1, activities: ['Alfama rajonas ir São Jorge pilis', 'Fado vakaras Mouraria'] },
+        { day: 2, activities: ['Sintra dieninė ekskursija (8:08 traukinys)', 'Grįžimas saulėlydžiui'] },
+        { day: 3, activities: ['Belém rajonas: Jerónimos, pastéis de Belém', 'LX Factory savaitgalio turgus'] },
+        { day: 4, activities: ['Naujametinė šventė Praça do Comércio', 'Fejerverkai prie upės'] },
+        { day: 5, activities: ['Príncipe Real rajonas', 'Skrydis namo'] },
+      ],
+      costs: { flights: 210, hotel: 400, food: 200, transport: 60, activities: 90 },
+    },
+  });
+
+  await prisma.readyPlan.upsert({
+    where: { id: 'naujieji-lisabona' },
+    update: {},
+    create: {
+      id: 'naujieji-lisabona',
+      itineraryId: itin2.id,
+      title: 'Naujieji metai Lisabonoje',
+      subtitle: '5 dienos · Gru 29 – Sau 3, 2027',
+      price: 1290,
+      imgUrl: 'https://images.unsplash.com/photo-1536663815808-535e2280d2c2?w=600&q=80',
+      badge: 'Sezoninis',
+      tags: ['Poroms', 'Naujieji', 'Kultūra'],
+      isPublished: true,
+    },
+  });
+
+  const itin3 = await prisma.itinerary.upsert({
+    where: { id: 'itin-paris-rome' },
+    update: {},
+    create: {
+      id: 'itin-paris-rome',
+      title: 'Paryžius + Roma 7 dienoms',
+      days: [],
+      costs: { flights: 350, hotel: 700, food: 420, transport: 130, activities: 200 },
+    },
+  });
+
+  const seg1exists = await prisma.itinerarySegment.findFirst({ where: { itineraryId: itin3.id, order: 1 } });
+  if (!seg1exists) {
+    await prisma.itinerarySegment.create({
+      data: {
+        itineraryId: itin3.id,
+        destinationId: 'paris',
+        order: 1,
+        days: [
+          { day: 1, activities: ['Eiffelio bokštas be eilių (9:00)', 'Le Marais rajonas'] },
+          { day: 2, activities: ['Luvras (trečiadieniais iki 21:45)', 'Montmartre saulėlydis'] },
+          { day: 3, activities: ['Versalis (anksti ryte)', 'Skrydis į Romą vakare'] },
+        ],
+        costs: { flights: 150, hotel: 360, food: 210, transport: 60, activities: 100 },
+      },
+    });
+  }
+
+  const seg2exists = await prisma.itinerarySegment.findFirst({ where: { itineraryId: itin3.id, order: 2 } });
+  if (!seg2exists) {
+    await prisma.itinerarySegment.create({
+      data: {
+        itineraryId: itin3.id,
+        destinationId: 'rome',
+        order: 2,
+        days: [
+          { day: 4, activities: ['Vatikano muziejus 8:00 (be eilių)', 'Šv. Petro bazilika'] },
+          { day: 5, activities: ['Koliziejus ir Romos forumas', 'Trastevere vakaras'] },
+          { day: 6, activities: ['Borghese galerija', 'Trevi fontanas auštant'] },
+          { day: 7, activities: ['Laisvos pusryčiai Campo de\' Fiori', 'Skrydis namo'] },
+        ],
+        costs: { flights: 200, hotel: 340, food: 210, transport: 70, activities: 100 },
+      },
+    });
+  }
+
+  await prisma.readyPlan.upsert({
+    where: { id: 'paris-roma-7d' },
+    update: {},
+    create: {
+      id: 'paris-roma-7d',
+      itineraryId: itin3.id,
+      title: 'Paryžius + Roma 7 dienoms',
+      subtitle: '7 dienų Europos klasika',
+      price: 1799,
+      imgUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80',
+      badge: 'Geriausias pasirinkimas',
+      tags: ['Poroms', 'Kultūra', 'Europa'],
+      isPublished: true,
+    },
+  });
+
+  console.log('✅ Experiences, Testimonials, and ReadyPlans seeded');
+
   console.log(`
 Done.
   Destinations:  ${destinations.length}
   Attractions:   ${attractions.length}
   Restaurants:   ${restaurants.length}
   Hotels:        ${hotels.length}
+  Experiences:   ${experiences.length}
+  Testimonials:  ${testimonials.length}
 `);
 }
 

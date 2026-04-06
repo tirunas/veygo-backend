@@ -16,6 +16,10 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { AttractionsModule } from './modules/attractions/attractions.module';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
 import { HotelsModule } from './modules/hotels/hotels.module';
+import { ItinerariesModule } from './modules/itineraries/itineraries.module';
+import { ReadyPlansModule } from './modules/ready-plans/ready-plans.module';
+import { ExperiencesModule } from './modules/experiences/experiences.module';
+import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
@@ -62,6 +66,10 @@ import * as winston from 'winston';
     AttractionsModule,
     RestaurantsModule,
     HotelsModule,
+    ItinerariesModule,
+    ReadyPlansModule,
+    ExperiencesModule,
+    TestimonialsModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
