@@ -41,6 +41,8 @@ describe('DestinationsService', () => {
   let mockRepo: jest.Mocked<DestinationsRepository>;
   let mockCache: { get: jest.Mock; set: jest.Mock; del: jest.Mock };
   let mockGeoMatching: { recomputeForDestination: jest.Mock };
+  let mockAttractionsService: any;
+  let mockRestaurantsService: any;
 
   beforeEach(() => {
     mockRepo = {
@@ -61,9 +63,20 @@ describe('DestinationsService', () => {
       recomputeForDestination: jest.fn(),
     };
 
+    mockAttractionsService = {
+      findByDestination: jest.fn(),
+      findPinsByDestination: jest.fn(),
+    };
+    mockRestaurantsService = {
+      findByDestination: jest.fn(),
+      findPinsByDestination: jest.fn(),
+    };
+
     service = new DestinationsService(
       mockRepo,
       mockGeoMatching as any,
+      mockAttractionsService,
+      mockRestaurantsService,
       mockCache as unknown as import('@nestjs/cache-manager').Cache,
     );
   });
@@ -174,175 +187,153 @@ describe('DestinationsService', () => {
   });
 
   describe('findAttractions', () => {
-    it('returns cached attractions on cache hit', async () => {
-      const pins = [
+    it('returns attractions from service', async () => {
+      const attractions = [
         {
+          id: 'attr-1',
           name: 'Museum',
           lat: 1,
           lng: 2,
           description: 'Art museum',
-          category: 'culture',
+          category: 'popular' as const,
+          img: 'museum.jpg',
+          destinationId: 'dest-1',
+          priceAndDuration: '$10, 2h',
+          location: { lat: 1, lng: 2 },
         },
       ];
-      mockCache.get.mockResolvedValue(pins);
+      mockAttractionsService.findByDestination.mockResolvedValue(attractions);
 
       const result = await service.findAttractions('dest-1');
 
-      expect(mockCache.get).toHaveBeenCalledWith(
-        DEST_ATTRACTIONS_KEY('dest-1'),
-      );
-      expect(result).toEqual(pins);
+      expect(mockAttractionsService.findByDestination).toHaveBeenCalledWith('dest-1');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        name: 'Museum',
+        lat: 1,
+        lng: 2,
+        description: 'Art museum',
+        category: 'popular',
+      });
     });
 
-    it('fetches from DB, caches, and returns on cache miss', async () => {
-      const fakeRecord = {
-        ...mockDestination,
-        id: 'dest-1',
-        attractions: [
-          {
-            name: 'Beach',
-            lat: 1,
-            lng: 2,
-            description: 'Sandy',
-            category: 'nature',
-          },
-        ],
-      };
-      mockCache.get.mockResolvedValue(null);
-      mockRepo.findById.mockResolvedValue(fakeRecord);
+    it('returns empty array when no attractions', async () => {
+      mockAttractionsService.findByDestination.mockResolvedValue([]);
 
       const result = await service.findAttractions('dest-1');
 
-      expect(mockCache.set).toHaveBeenCalledWith(
-        DEST_ATTRACTIONS_KEY('dest-1'),
-        fakeRecord.attractions,
-        DEST_ATTRACTIONS_TTL * 1000,
-      );
-      expect(result).toEqual(fakeRecord.attractions);
-    });
-
-    it('throws NotFoundException when destination not found', async () => {
-      mockCache.get.mockResolvedValue(null);
-      mockRepo.findById.mockResolvedValue(null);
-
-      await expect(service.findAttractions('missing')).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(result).toEqual([]);
     });
   });
 
   describe('findFoodSpots', () => {
-    it('returns cached food spots on cache hit', async () => {
-      const spots = [
+    it('returns food spots from service', async () => {
+      const restaurants = [
         {
+          id: 'rest-1',
           name: 'Cafe',
           lat: 1,
           lng: 2,
           description: 'Good coffee',
-          cuisine: 'cafe',
-          priceRange: '$',
+          type: 'cafe',
+          price: '$',
+          location: { lat: 1, lng: 2 },
         },
       ];
-      mockCache.get.mockResolvedValue(spots);
+      mockRestaurantsService.findByDestination.mockResolvedValue(restaurants);
 
       const result = await service.findFoodSpots('dest-1');
 
-      expect(result).toEqual(spots);
+      expect(mockRestaurantsService.findByDestination).toHaveBeenCalledWith('dest-1');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        name: 'Cafe',
+        lat: 1,
+        lng: 2,
+        description: 'Good coffee',
+        cuisine: 'cafe',
+        priceRange: '$',
+      });
     });
 
-    it('fetches and caches on cache miss', async () => {
-      const fakeRecord = {
-        ...mockDestination,
-        id: 'dest-1',
-        foodSpots: [
-          {
-            name: 'Bistro',
-            lat: 1,
-            lng: 2,
-            description: 'French',
-            cuisine: 'french',
-            priceRange: '$$',
-          },
-        ],
-      };
-      mockCache.get.mockResolvedValue(null);
-      mockRepo.findById.mockResolvedValue(fakeRecord);
+    it('returns empty array when no restaurants', async () => {
+      mockRestaurantsService.findByDestination.mockResolvedValue([]);
 
       const result = await service.findFoodSpots('dest-1');
 
-      expect(mockCache.set).toHaveBeenCalledWith(
-        DEST_FOOD_KEY('dest-1'),
-        fakeRecord.foodSpots,
-        DEST_FOOD_TTL * 1000,
-      );
-      expect(result).toEqual(fakeRecord.foodSpots);
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('findMapData', () => {
+    it('returns map data with attractions and restaurants', async () => {
+      const destination = {
+        ...mockDestination,
+        id: 'dest-1',
+        lat: 10,
+        lng: 20,
+      };
+      const attractionPins = [
+        {
+          id: 'attr-1',
+          name: 'Museum',
+          location: { lat: 10.1, lng: 20.1 },
+          category: 'popular',
+          img: 'museum.jpg',
+        },
+      ];
+      const restaurantPins = [
+        {
+          id: 'rest-1',
+          name: 'Cafe',
+          location: { lat: 10.2, lng: 20.2 },
+          type: 'cafe',
+          price: '$',
+        },
+      ];
+
+      mockCache.get.mockResolvedValue(null);
+      mockRepo.findById.mockResolvedValue(destination);
+      mockAttractionsService.findPinsByDestination.mockResolvedValue(attractionPins);
+      mockRestaurantsService.findPinsByDestination.mockResolvedValue(restaurantPins);
+
+      const result = await service.findMapData('dest-1');
+
+      expect(result).toBeDefined();
+      expect(result?.centerLat).toBe(10);
+      expect(result?.centerLng).toBe(20);
+      expect(result?.zoom).toBe(12);
+      expect(result?.attractions).toHaveLength(1);
+      expect(result?.foodSpots).toHaveLength(1);
+    });
+
+    it('returns map data with empty arrays when no POI', async () => {
+      const destination = {
+        ...mockDestination,
+        id: 'dest-1',
+        lat: 10,
+        lng: 20,
+      };
+
+      mockCache.get.mockResolvedValue(null);
+      mockRepo.findById.mockResolvedValue(destination);
+      mockAttractionsService.findPinsByDestination.mockResolvedValue([]);
+      mockRestaurantsService.findPinsByDestination.mockResolvedValue([]);
+
+      const result = await service.findMapData('dest-1');
+
+      expect(result).toBeDefined();
+      expect(result?.attractions).toEqual([]);
+      expect(result?.foodSpots).toEqual([]);
     });
 
     it('throws NotFoundException when destination not found', async () => {
       mockCache.get.mockResolvedValue(null);
       mockRepo.findById.mockResolvedValue(null);
 
-      await expect(service.findFoodSpots('missing')).rejects.toThrow(
+      await expect(service.findMapData('missing')).rejects.toThrow(
         NotFoundException,
       );
-    });
-  });
-
-  describe('findMapData', () => {
-    it('returns cached map data on hit', async () => {
-      const mapData = {
-        centerLat: 1,
-        centerLng: 2,
-        zoom: 12,
-        attractions: [],
-        foodSpots: [],
-      };
-      mockCache.get.mockResolvedValue(mapData);
-
-      const result = await service.findMapData('dest-1');
-
-      expect(result).toEqual(mapData);
-    });
-
-    it('fetches and caches on miss', async () => {
-      const fakeRecord = {
-        ...mockDestination,
-        id: 'dest-1',
-        mapData: {
-          centerLat: 1,
-          centerLng: 2,
-          zoom: 12,
-          attractions: [],
-          foodSpots: [],
-        },
-      };
-      mockCache.get.mockResolvedValue(null);
-      mockRepo.findById.mockResolvedValue(fakeRecord);
-
-      const result = await service.findMapData('dest-1');
-
-      expect(mockCache.set).toHaveBeenCalledWith(
-        DEST_MAP_KEY('dest-1'),
-        fakeRecord.mapData,
-        DEST_MAP_TTL * 1000,
-      );
-      expect(result).toEqual(fakeRecord.mapData);
-    });
-
-    it('returns null when mapData is undefined', async () => {
-      const fakeRecord = {
-        ...mockDestination,
-        id: 'dest-1',
-        mapData: undefined,
-      };
-      mockCache.get.mockResolvedValue(null);
-      mockRepo.findById.mockResolvedValue(fakeRecord);
-
-      const result = await service.findMapData('dest-1');
-
-      expect(result).toBeNull();
-
-      expect(mockCache.set).not.toHaveBeenCalled();
     });
   });
 });

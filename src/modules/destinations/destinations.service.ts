@@ -28,12 +28,16 @@ import {
   POI_HOTELS_KEY,
 } from '../../cache/cache.constants';
 import { GeoMatchingService } from '../geo-matching/geo-matching.service';
+import { AttractionsService } from '../attractions/attractions.service';
+import { RestaurantsService } from '../restaurants/restaurants.service';
 
 @Injectable()
 export class DestinationsService {
   constructor(
     private readonly destinationsRepository: DestinationsRepository,
     private readonly geoMatchingService: GeoMatchingService,
+    private readonly attractionsService: AttractionsService,
+    private readonly restaurantsService: RestaurantsService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -100,55 +104,59 @@ export class DestinationsService {
   }
 
   async findAttractions(id: string): Promise<AttractionPin[]> {
-    const cached = await this.cacheManager.get<AttractionPin[]>(
-      DEST_ATTRACTIONS_KEY(id),
-    );
-    if (cached) return cached;
-
-    const record = await this.destinationsRepository.findById(id);
-    if (!record) throw new NotFoundException('Destination not found');
-
-    await this.cacheManager.set(
-      DEST_ATTRACTIONS_KEY(id),
-      record.attractions || [],
-      DEST_ATTRACTIONS_TTL * 1000,
-    );
-    return record.attractions || [];
+    const attractions = await this.attractionsService.findByDestination(id);
+    return attractions.map((a) => ({
+      name: a.name,
+      description: a.description,
+      lat: a.lat,
+      lng: a.lng,
+      category: a.category,
+    }));
   }
 
   async findFoodSpots(id: string): Promise<FoodSpotPin[]> {
-    const cached = await this.cacheManager.get<FoodSpotPin[]>(
-      DEST_FOOD_KEY(id),
-    );
-    if (cached) return cached;
-
-    const record = await this.destinationsRepository.findById(id);
-    if (!record) throw new NotFoundException('Destination not found');
-
-    await this.cacheManager.set(
-      DEST_FOOD_KEY(id),
-      record.foodSpots || [],
-      DEST_FOOD_TTL * 1000,
-    );
-    return record.foodSpots || [];
+    const foodSpots = await this.restaurantsService.findByDestination(id);
+    return foodSpots.map((f) => ({
+      name: f.name,
+      description: f.description,
+      lat: f.lat,
+      lng: f.lng,
+      cuisine: f.type || '',
+      priceRange: f.price,
+    }));
   }
 
   async findMapData(id: string): Promise<MapData | null> {
-    const cached = await this.cacheManager.get<MapData>(DEST_MAP_KEY(id));
-    if (cached) return cached;
+    const destination = await this.findByIdOrThrow(id);
+    const [attractionPins, restaurantPins] = await Promise.all([
+      this.attractionsService.findPinsByDestination(id),
+      this.restaurantsService.findPinsByDestination(id),
+    ]);
 
-    const record = await this.destinationsRepository.findById(id);
-    if (!record) throw new NotFoundException('Destination not found');
+    const attractions = attractionPins.map((pin) => ({
+      name: pin.name,
+      description: '',
+      lat: pin.location.lat,
+      lng: pin.location.lng,
+      category: pin.category,
+    }));
 
-    const mapData = record.mapData ?? null;
-    if (mapData) {
-      await this.cacheManager.set(
-        DEST_MAP_KEY(id),
-        mapData,
-        DEST_MAP_TTL * 1000,
-      );
-    }
-    return mapData;
+    const foodSpots = restaurantPins.map((pin) => ({
+      name: pin.name,
+      description: '',
+      lat: pin.location.lat,
+      lng: pin.location.lng,
+      cuisine: pin.type,
+      priceRange: pin.price,
+    }));
+
+    return {
+      centerLat: destination.lat || 0,
+      centerLng: destination.lng || 0,
+      zoom: 12,
+      attractions,
+      foodSpots,
+    };
   }
 
   toSummary(record: DestinationRecord): DestinationSummary {

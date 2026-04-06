@@ -49,7 +49,7 @@ describe('DestinationsRepository', () => {
       bestSeason: 'spring',
       imgUrl: 'https://example.com/paris.jpg',
       heroImageUrl: 'https://example.com/paris-hero.jpg',
-      content: {},
+      content: { attractions: [], foodSpots: [] },
     };
     const mockRecord = {
       ...input,

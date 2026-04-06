@@ -53,6 +53,9 @@ export interface DestinationRecord {
   attractions?: AttractionPin[];
   foodSpots?: FoodSpotPin[];
   mapData?: MapData;
+  lat?: number | null;
+  lng?: number | null;
+  radiusKm?: number;
   createdAt: Date;
   updatedAt: Date;
 }
