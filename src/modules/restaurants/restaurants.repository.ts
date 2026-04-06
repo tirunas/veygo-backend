@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PoiRepositoryBase } from '../../common/base/poi.repository.base';
 import type { CreateRestaurantInput, UpdateRestaurantInput } from './restaurants.types';
 
 @Injectable()
-export class RestaurantsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class RestaurantsRepository extends PoiRepositoryBase {
+  constructor(private readonly prisma: PrismaService) {
+    super(prisma);
+  }
 
-  async findByDestination(destinationId: string) {
-    return this.prisma.restaurant.findMany({
-      where: {
-        destinations: { some: { destinationId } },
-      },
-      orderBy: { name: 'asc' },
-    });
+  protected getTableName(): 'restaurant' {
+    return 'restaurant';
+  }
+
+  protected getJoinTableName(): 'destinationRestaurant' {
+    return 'destinationRestaurant';
+  }
+
+  protected getJoinTableIdField(): string {
+    return 'restaurantId';
   }
 
   async findPinsByDestination(destinationId: string) {
@@ -22,10 +28,6 @@ export class RestaurantsRepository {
       },
       select: { id: true, name: true, lat: true, lng: true, type: true, price: true },
     });
-  }
-
-  async findById(id: string) {
-    return this.prisma.restaurant.findUnique({ where: { id } });
   }
 
   async create(input: CreateRestaurantInput) {
@@ -48,18 +50,5 @@ export class RestaurantsRepository {
       where: { id },
       data: updates,
     });
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.prisma.destinationRestaurant.deleteMany({ where: { restaurantId: id } });
-    await this.prisma.restaurant.delete({ where: { id } });
-  }
-
-  async findLinkedDestinationIds(restaurantId: string): Promise<string[]> {
-    const rows = await this.prisma.destinationRestaurant.findMany({
-      where: { restaurantId },
-      select: { destinationId: true },
-    });
-    return rows.map((r) => r.destinationId);
   }
 }

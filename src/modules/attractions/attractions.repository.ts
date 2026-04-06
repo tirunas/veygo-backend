@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PoiRepositoryBase } from '../../common/base/poi.repository.base';
 import type { CreateAttractionInput, UpdateAttractionInput } from './attractions.types';
 
 @Injectable()
-export class AttractionsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class AttractionsRepository extends PoiRepositoryBase {
+  constructor(private readonly prisma: PrismaService) {
+    super(prisma);
+  }
 
-  async findByDestination(destinationId: string) {
-    return this.prisma.attraction.findMany({
-      where: {
-        destinations: { some: { destinationId } },
-      },
-      orderBy: { name: 'asc' },
-    });
+  protected getTableName(): 'attraction' {
+    return 'attraction';
+  }
+
+  protected getJoinTableName(): 'destinationAttraction' {
+    return 'destinationAttraction';
+  }
+
+  protected getJoinTableIdField(): string {
+    return 'attractionId';
   }
 
   async findPinsByDestination(destinationId: string) {
@@ -22,10 +28,6 @@ export class AttractionsRepository {
       },
       select: { id: true, name: true, lat: true, lng: true, category: true, img: true },
     });
-  }
-
-  async findById(id: string) {
-    return this.prisma.attraction.findUnique({ where: { id } });
   }
 
   async create(input: CreateAttractionInput) {
@@ -43,18 +45,5 @@ export class AttractionsRepository {
       where: { id },
       data: content !== undefined ? { ...data, content: content as any } : data,
     });
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.prisma.destinationAttraction.deleteMany({ where: { attractionId: id } });
-    await this.prisma.attraction.delete({ where: { id } });
-  }
-
-  async findLinkedDestinationIds(attractionId: string): Promise<string[]> {
-    const rows = await this.prisma.destinationAttraction.findMany({
-      where: { attractionId },
-      select: { destinationId: true },
-    });
-    return rows.map((r) => r.destinationId);
   }
 }
