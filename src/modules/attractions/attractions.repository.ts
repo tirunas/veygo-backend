@@ -29,8 +29,8 @@ export class AttractionsRepository {
   }
 
   async create(input: CreateAttractionInput) {
-    const { destinationId, content, ...data } = input;
-    void destinationId;
+    const { destinationId: _destinationId, content, ...data } = input;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     return this.prisma.attraction.create({
       data: { ...data, content: (content ?? {}) as any },
     });
@@ -38,13 +38,14 @@ export class AttractionsRepository {
 
   async update(id: string, input: UpdateAttractionInput) {
     const { content, ...data } = input;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     return this.prisma.attraction.update({
       where: { id },
       data: content !== undefined ? { ...data, content: content as any } : data,
     });
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<void> {
     await this.prisma.destinationAttraction.deleteMany({ where: { attractionId: id } });
     await this.prisma.attraction.delete({ where: { id } });
   }

@@ -40,6 +40,7 @@ describe('DestinationsService', () => {
   let service: DestinationsService;
   let mockRepo: jest.Mocked<DestinationsRepository>;
   let mockCache: { get: jest.Mock; set: jest.Mock; del: jest.Mock };
+  let mockGeoMatching: { recomputeForDestination: jest.Mock };
 
   beforeEach(() => {
     mockRepo = {
@@ -56,8 +57,13 @@ describe('DestinationsService', () => {
       del: jest.fn(),
     };
 
+    mockGeoMatching = {
+      recomputeForDestination: jest.fn(),
+    };
+
     service = new DestinationsService(
       mockRepo,
+      mockGeoMatching as any,
       mockCache as unknown as import('@nestjs/cache-manager').Cache,
     );
   });
