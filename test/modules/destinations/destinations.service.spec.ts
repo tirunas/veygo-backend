@@ -207,14 +207,9 @@ describe('DestinationsService', () => {
       const result = await service.findAttractions('dest-1');
 
       expect(mockAttractionsService.findByDestination).toHaveBeenCalledWith('dest-1');
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({
-        name: 'Museum',
-        lat: 1,
-        lng: 2,
-        description: 'Art museum',
-        category: 'popular',
-      });
+      expect(result.totalCount).toBe(1);
+      expect(result.destinationId).toBe('dest-1');
+      expect(result.attractions[0].name).toBe('Museum');
     });
 
     it('returns empty array when no attractions', async () => {
@@ -222,7 +217,8 @@ describe('DestinationsService', () => {
 
       const result = await service.findAttractions('dest-1');
 
-      expect(result).toEqual([]);
+      expect(result.attractions).toEqual([]);
+      expect(result.totalCount).toBe(0);
     });
   });
 
@@ -245,15 +241,8 @@ describe('DestinationsService', () => {
       const result = await service.findFoodSpots('dest-1');
 
       expect(mockRestaurantsService.findByDestination).toHaveBeenCalledWith('dest-1');
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({
-        name: 'Cafe',
-        lat: 1,
-        lng: 2,
-        description: 'Good coffee',
-        cuisine: 'cafe',
-        priceRange: '$',
-      });
+      expect(result.destinationId).toBe('dest-1');
+      expect(result.foodSpots[0].name).toBe('Cafe');
     });
 
     it('returns empty array when no restaurants', async () => {
@@ -261,7 +250,7 @@ describe('DestinationsService', () => {
 
       const result = await service.findFoodSpots('dest-1');
 
-      expect(result).toEqual([]);
+      expect(result.foodSpots).toEqual([]);
     });
   });
 

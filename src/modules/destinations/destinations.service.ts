@@ -103,27 +103,14 @@ export class DestinationsService {
     await this.cacheManager.del(DEST_CONTENT_KEY(id));
   }
 
-  async findAttractions(id: string): Promise<AttractionPin[]> {
+  async findAttractions(id: string) {
     const attractions = await this.attractionsService.findByDestination(id);
-    return attractions.map((a) => ({
-      name: a.name,
-      description: a.description,
-      lat: a.lat,
-      lng: a.lng,
-      category: a.category,
-    }));
+    return { destinationId: id, attractions, totalCount: attractions.length };
   }
 
-  async findFoodSpots(id: string): Promise<FoodSpotPin[]> {
+  async findFoodSpots(id: string) {
     const foodSpots = await this.restaurantsService.findByDestination(id);
-    return foodSpots.map((f) => ({
-      name: f.name,
-      description: f.description,
-      lat: f.lat,
-      lng: f.lng,
-      cuisine: f.type || '',
-      priceRange: f.price,
-    }));
+    return { destinationId: id, foodSpots };
   }
 
   async findMapData(id: string): Promise<MapData | null> {

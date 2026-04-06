@@ -437,8 +437,10 @@ async function main() {
   for (const attraction of attractions) {
     await prisma.attraction.upsert({
       where: { id: attraction.id },
-      update: attraction,
-      create: attraction,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      update: attraction as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: attraction as any,
     });
     console.log(`  ✓ ${attraction.name}`);
   }
@@ -447,8 +449,10 @@ async function main() {
   for (const restaurant of restaurants) {
     await prisma.restaurant.upsert({
       where: { id: restaurant.id },
-      update: restaurant,
-      create: restaurant,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      update: restaurant as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: restaurant as any,
     });
     console.log(`  ✓ ${restaurant.name}`);
   }
@@ -457,8 +461,10 @@ async function main() {
   for (const hotel of hotels) {
     await prisma.hotel.upsert({
       where: { id: hotel.id },
-      update: hotel,
-      create: hotel,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      update: hotel as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: hotel as any,
     });
     console.log(`  ✓ ${hotel.name}`);
   }

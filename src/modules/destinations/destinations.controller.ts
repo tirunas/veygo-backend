@@ -35,12 +35,12 @@ export class DestinationsController {
   }
 
   @Get(':id/attractions')
-  async findAttractions(@Param('id') id: string): Promise<AttractionPin[]> {
+  async findAttractions(@Param('id') id: string) {
     return this.destinationsService.findAttractions(id);
   }
 
   @Get(':id/food-spots')
-  async findFoodSpots(@Param('id') id: string): Promise<FoodSpotPin[]> {
+  async findFoodSpots(@Param('id') id: string) {
     return this.destinationsService.findFoodSpots(id);
   }
 
