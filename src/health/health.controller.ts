@@ -18,7 +18,7 @@ export class HealthController {
   async readiness(): Promise<{ database: string; redis: string }> {
     let database = 'ok';
     try {
-      await this.prisma.executeRaw`SELECT 1`;
+      await this.prisma.destination.findFirst();
     } catch {
       database = 'error';
     }

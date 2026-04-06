@@ -31,7 +31,7 @@ export abstract class PoiRepositoryBase {
    * Find all records linked to a destination, ordered by name ascending.
    */
   async findByDestination(destinationId: string) {
-    const table = this.prisma[this.getTableName()];
+    const table = this.prisma[this.getTableName()] as any;
     return table.findMany({
       where: {
         destinations: { some: { destinationId } },
@@ -44,7 +44,7 @@ export abstract class PoiRepositoryBase {
    * Find a single record by ID.
    */
   async findById(id: string) {
-    const table = this.prisma[this.getTableName()];
+    const table = this.prisma[this.getTableName()] as any;
     return table.findUnique({ where: { id } });
   }
 
@@ -52,25 +52,25 @@ export abstract class PoiRepositoryBase {
    * Find all destination IDs linked to a POI record.
    */
   async findLinkedDestinationIds(poiId: string): Promise<string[]> {
-    const joinTable = this.prisma[this.getJoinTableName()];
+    const joinTable = this.prisma[this.getJoinTableName()] as any;
     const idField = this.getJoinTableIdField();
 
     const rows = await joinTable.findMany({
       where: { [idField]: poiId },
       select: { destinationId: true },
     });
-    return rows.map((r) => r.destinationId);
+    return rows.map((r: { destinationId: string }) => r.destinationId);
   }
 
   /**
    * Delete all junction table entries and the POI record itself.
    */
   async delete(id: string): Promise<void> {
-    const joinTable = this.prisma[this.getJoinTableName()];
+    const joinTable = this.prisma[this.getJoinTableName()] as any;
     const idField = this.getJoinTableIdField();
 
     await joinTable.deleteMany({ where: { [idField]: id } });
-    const table = this.prisma[this.getTableName()];
+    const table = this.prisma[this.getTableName()] as any;
     await table.delete({ where: { id } });
   }
 }

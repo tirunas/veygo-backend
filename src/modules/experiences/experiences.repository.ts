@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
@@ -27,7 +28,7 @@ export class ExperiencesRepository {
 
   async create(data: CreateExperienceInput): Promise<Experience> {
     const row = await this.prisma.experience.create({
-      data,
+      data: { ...data, content: data.content as unknown as Prisma.InputJsonValue },
     });
     return row as Experience;
   }
@@ -35,7 +36,7 @@ export class ExperiencesRepository {
   async update(id: string, data: UpdateExperienceInput): Promise<Experience> {
     const row = await this.prisma.experience.update({
       where: { id },
-      data,
+      data: { ...data, content: data.content as unknown as Prisma.InputJsonValue },
     });
     return row as Experience;
   }

@@ -5,7 +5,7 @@ import type { CreateRestaurantInput, UpdateRestaurantInput } from './restaurants
 
 @Injectable()
 export class RestaurantsRepository extends PoiRepositoryBase {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(protected readonly prisma: PrismaService) {
     super(prisma);
   }
 

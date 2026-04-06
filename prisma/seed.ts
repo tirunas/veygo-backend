@@ -1,7 +1,12 @@
+import 'dotenv/config';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, AttractionCategory, HotelTier } from '@prisma/client';
 import { haversineDistanceKm } from '../src/modules/geo-matching/haversine';
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new (PrismaClient as unknown as new (options?: unknown) => PrismaClient)({ adapter });
 
 // ─── Destinations ─────────────────────────────────────────────────────────────
 

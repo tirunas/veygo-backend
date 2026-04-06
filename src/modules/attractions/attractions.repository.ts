@@ -5,7 +5,7 @@ import type { CreateAttractionInput, UpdateAttractionInput } from './attractions
 
 @Injectable()
 export class AttractionsRepository extends PoiRepositoryBase {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(protected readonly prisma: PrismaService) {
     super(prisma);
   }
 
@@ -23,7 +23,7 @@ export class AttractionsRepository extends PoiRepositoryBase {
 
   async findByDestination(destinationId: string) {
     const rows = await super.findByDestination(destinationId);
-    return rows.map((r) => ({ ...r, destinationId }));
+    return rows.map((r: Record<string, unknown>) => ({ ...r, destinationId }));
   }
 
   async findPinsByDestination(destinationId: string) {

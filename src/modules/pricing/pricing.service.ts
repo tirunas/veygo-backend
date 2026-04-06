@@ -50,6 +50,6 @@ export class PricingService {
   }
 
   detectOrigin(): DetectOriginResponse {
-    return { hubCode: 'VNO' as HubCode };
+    return { hubCode: 'VNO' };
   }
 }

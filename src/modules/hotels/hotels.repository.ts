@@ -5,7 +5,7 @@ import type { CreateHotelInput, UpdateHotelInput } from './hotels.types';
 
 @Injectable()
 export class HotelsRepository extends PoiRepositoryBase {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(protected readonly prisma: PrismaService) {
     super(prisma);
   }
 

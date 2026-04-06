@@ -20,7 +20,7 @@ export class ItinerariesService {
 
   async findAll(): Promise<Itinerary[]> {
     const rows = await this.repo.findAll();
-    return rows as Itinerary[];
+    return rows as unknown as Itinerary[];
   }
 
   async findById(id: string): Promise<Itinerary> {
@@ -34,7 +34,7 @@ export class ItinerariesService {
       throw new NotFoundException(`Itinerary ${id} not found`);
     }
 
-    const itinerary = row as Itinerary;
+    const itinerary = row as unknown as Itinerary;
     await this.cacheManager.set(
       ITINERARY_KEY(id),
       itinerary,
@@ -45,13 +45,13 @@ export class ItinerariesService {
 
   async create(data: CreateItineraryInput): Promise<Itinerary> {
     const record = await this.repo.create(data);
-    return record as Itinerary;
+    return record as unknown as Itinerary;
   }
 
   async update(id: string, data: UpdateItineraryInput): Promise<Itinerary> {
     const record = await this.repo.update(id, data);
     await this.cacheManager.del(ITINERARY_KEY(id));
-    return record as Itinerary;
+    return record as unknown as Itinerary;
   }
 
   async delete(id: string): Promise<void> {
