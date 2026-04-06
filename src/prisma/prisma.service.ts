@@ -72,9 +72,19 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.initializeClient().destinationHotel;
   }
 
-  async executeRaw(query: TemplateStringsArray): Promise<unknown> {
-    const client = this.initializeClient();
+  get experience() {
+    return this.initializeClient().experience;
+  }
 
-    return client.$queryRaw(query);
+  get itinerary() {
+    return this.initializeClient().itinerary;
+  }
+
+  get readyPlan() {
+    return this.initializeClient().readyPlan;
+  }
+
+  get testimonial() {
+    return this.initializeClient().testimonial;
   }
 }

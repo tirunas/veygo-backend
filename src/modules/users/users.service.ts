@@ -12,7 +12,7 @@ export class UsersService {
 
   async findByIdOrThrow(id: string): Promise<UserRecord> {
     const user = await this.usersRepository.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException(`User ${id} not found`);
     return user;
   }
 

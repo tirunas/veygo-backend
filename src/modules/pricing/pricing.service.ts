@@ -5,9 +5,7 @@ import {
   PriceEntry,
   BatchPriceResponse,
   DetectOriginResponse,
-  HubCode,
 } from './pricing.types';
-import { normalizeToHub } from './hub-lookup';
 import { PRICE_KEY, PRICE_TTL } from '../../cache/cache.constants';
 
 @Injectable()
@@ -21,7 +19,7 @@ export class PricingService {
     destinationId: string,
     originCode: string,
   ): Promise<PriceEntry> {
-    const hubCode = normalizeToHub(originCode);
+    const hubCode = 'VNO' as const;
     const cacheKey = PRICE_KEY(destinationId, hubCode);
 
     const cached = await this.cacheManager.get<PriceEntry>(cacheKey);

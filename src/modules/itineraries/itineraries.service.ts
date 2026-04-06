@@ -31,7 +31,7 @@ export class ItinerariesService {
 
     const row = await this.repo.findById(id);
     if (!row) {
-      throw new NotFoundException(`Itinerary with id ${id} not found`);
+      throw new NotFoundException(`Itinerary ${id} not found`);
     }
 
     const itinerary = row as Itinerary;

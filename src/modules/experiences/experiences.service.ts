@@ -39,7 +39,7 @@ export class ExperiencesService {
 
     const experience = await this.repo.findById(id);
     if (!experience) {
-      throw new NotFoundException(`Experience with id ${id} not found`);
+      throw new NotFoundException(`Experience ${id} not found`);
     }
 
     await this.cacheManager.set(cacheKey, experience, EXPERIENCE_TTL * 1000);
@@ -54,14 +54,19 @@ export class ExperiencesService {
 
   async update(id: string, data: UpdateExperienceInput): Promise<Experience> {
     const experience = await this.repo.update(id, data);
-    await this.cacheManager.del(EXPERIENCES_LIST_KEY);
-    await this.cacheManager.del(EXPERIENCE_KEY(id));
+    await this.bustCaches(id);
     return experience;
   }
 
   async delete(id: string): Promise<void> {
     await this.repo.delete(id);
-    await this.cacheManager.del(EXPERIENCES_LIST_KEY);
-    await this.cacheManager.del(EXPERIENCE_KEY(id));
+    await this.bustCaches(id);
+  }
+
+  private async bustCaches(id: string): Promise<void> {
+    await Promise.all([
+      this.cacheManager.del(EXPERIENCES_LIST_KEY),
+      this.cacheManager.del(EXPERIENCE_KEY(id)),
+    ]);
   }
 }

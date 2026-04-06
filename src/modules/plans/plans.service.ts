@@ -50,7 +50,7 @@ export class PlansService {
     userId: string,
   ): Promise<UserPlanRecord> {
     const plan = await this.plansRepository.findByIdAndUserId(planId, userId);
-    if (!plan) throw new NotFoundException('Plan not found');
+    if (!plan) throw new NotFoundException(`Plan ${planId} not found`);
     return plan;
   }
 
@@ -83,7 +83,7 @@ export class PlansService {
 
   async findPlanByIdOrThrow(planId: string): Promise<UserPlanRecord> {
     const plan = await this.plansRepository.findById(planId);
-    if (!plan) throw new NotFoundException('Plan not found');
+    if (!plan) throw new NotFoundException(`Plan ${planId} not found`);
     return plan;
   }
 

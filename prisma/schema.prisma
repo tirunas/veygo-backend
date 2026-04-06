@@ -53,6 +53,7 @@ model User {
   userPlans     UserPlan[]
   purchases     Purchase[]
   auditLogs     AuditLog[]
+  readyPlanPurchases ReadyPlanPurchase[]
 
   @@index([email])
 }
@@ -139,6 +140,7 @@ model Destination {
   destinationAttractions DestinationAttraction[]
   destinationRestaurants DestinationRestaurant[]
   destinationHotels      DestinationHotel[]
+  itinerarySegments     ItinerarySegment[]
 
   @@index([name])
 }
@@ -237,4 +239,86 @@ model DestinationHotel {
   @@id([destinationId, hotelId])
   @@index([destinationId])
   @@index([hotelId])
+}
+
+model Itinerary {
+  id        String             @id @default(cuid())
+  title     String?
+  days      Json               @default("[]")
+  costs     Json               @default("{}")
+  segments  ItinerarySegment[]
+  readyPlan ReadyPlan?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model ItinerarySegment {
+  id            String      @id @default(cuid())
+  itineraryId   String
+  destinationId String
+  order         Int
+  days          Json        @default("[]")
+  costs         Json        @default("{}")
+  itinerary     Itinerary   @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  destination   Destination @relation(fields: [destinationId], references: [id])
+
+  @@index([itineraryId])
+  @@index([destinationId])
+}
+
+model ReadyPlan {
+  id          String              @id
+  itineraryId String              @unique
+  title       String
+  subtitle    String
+  price       Int
+  imgUrl      String
+  badge       String?
+  tags        String[]
+  isPublished Boolean             @default(false)
+  itinerary   Itinerary           @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  purchases   ReadyPlanPurchase[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model ReadyPlanPurchase {
+  id          String   @id @default(cuid())
+  userId      String
+  readyPlanId String
+  amount      Int
+  purchasedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  readyPlan   ReadyPlan @relation(fields: [readyPlanId], references: [id])
+
+  @@index([userId])
+  @@index([readyPlanId])
+}
+
+model Experience {
+  id            String   @id
+  destinationId String?
+  title         String
+  subtitle      String
+  category      String
+  heroImgUrl    String
+  price         String
+  duration      String
+  tags          String[]
+  content       Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Testimonial {
+  id              String  @id
+  text            String
+  author          String
+  city            String
+  initials        String
+  colorHex        String
+  destinationName String?
+  tripDate        String?
+  highlight       String?
+  savedAmount     String?
 }

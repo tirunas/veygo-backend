@@ -36,14 +36,14 @@ export class TestimonialsService {
   async findById(id: string): Promise<Testimonial> {
     const testimonial = await this.repo.findById(id);
     if (!testimonial) {
-      throw new NotFoundException(`Testimonial with id ${id} not found`);
+      throw new NotFoundException(`Testimonial ${id} not found`);
     }
     return testimonial as Testimonial;
   }
 
   async create(data: CreateTestimonialInput): Promise<Testimonial> {
     const testimonial = await this.repo.create(data);
-    await this.cacheManager.del(TESTIMONIALS_LIST_KEY);
+    await this.bustListCache();
     return testimonial as Testimonial;
   }
 
@@ -52,12 +52,16 @@ export class TestimonialsService {
     data: UpdateTestimonialInput,
   ): Promise<Testimonial> {
     const testimonial = await this.repo.update(id, data);
-    await this.cacheManager.del(TESTIMONIALS_LIST_KEY);
+    await this.bustListCache();
     return testimonial as Testimonial;
   }
 
   async delete(id: string): Promise<void> {
     await this.repo.delete(id);
+    await this.bustListCache();
+  }
+
+  private async bustListCache(): Promise<void> {
     await this.cacheManager.del(TESTIMONIALS_LIST_KEY);
   }
 }

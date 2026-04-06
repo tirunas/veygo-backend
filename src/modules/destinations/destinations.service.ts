@@ -59,7 +59,7 @@ export class DestinationsService {
     if (cached) return cached;
 
     const record = await this.destinationsRepository.findById(id);
-    if (!record) throw new NotFoundException('Destination not found');
+    if (!record) throw new NotFoundException(`Destination ${id} not found`);
     await this.cacheManager.set(
       DEST_CONTENT_KEY(id),
       record,
