@@ -1,9 +1,3 @@
-export interface RestaurantContent {
-  description?: string;
-  signature?: string;
-  reviews?: { text: string; author: string; rating: string }[];
-}
-
 export interface Restaurant {
   id: string;
   name: string;
@@ -18,7 +12,6 @@ export interface Restaurant {
   deliveryUrl?: string | null;
   petFriendly?: boolean;
   source?: string | null;
-  content: RestaurantContent;
   location: { lat: number; lng: number };
   signature?: string;
   reviews?: { text: string; author: string; rating: string }[];
@@ -47,7 +40,8 @@ export interface CreateRestaurantInput {
   deliveryUrl?: string;
   petFriendly?: boolean;
   source?: string;
-  content?: RestaurantContent;
+  signature?: string;
+  reviews?: { text: string; author: string; rating: string }[];
 }
 
 export interface UpdateRestaurantInput {
@@ -63,5 +57,6 @@ export interface UpdateRestaurantInput {
   deliveryUrl?: string;
   petFriendly?: boolean;
   source?: string;
-  content?: RestaurantContent;
+  signature?: string;
+  reviews?: { text: string; author: string; rating: string }[];
 }

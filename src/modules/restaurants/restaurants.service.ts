@@ -97,7 +97,6 @@ export class RestaurantsService {
       deliveryUrl: r.deliveryUrl,
       petFriendly: r.petFriendly,
       source: r.source,
-      content,
       location: { lat: r.lat, lng: r.lng },
       signature: content.signature,
       reviews: content.reviews,

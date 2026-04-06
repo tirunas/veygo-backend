@@ -29,19 +29,24 @@ export class RestaurantsRepository {
   }
 
   async create(input: CreateRestaurantInput) {
-    const { destinationId: _destinationId, content, ...data } = input;
+    const { destinationId: _destinationId, signature, reviews, ...data } = input;
+    const content = { signature, reviews };
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     return this.prisma.restaurant.create({
-      data: { ...data, content: (content ?? {}) as any },
+      data: { ...data, content: content as any },
     });
   }
 
   async update(id: string, input: UpdateRestaurantInput) {
-    const { content, ...data } = input;
+    const { signature, reviews, ...data } = input;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const updates: any = { ...data };
+    if (signature !== undefined || reviews !== undefined) {
+      updates.content = { signature, reviews };
+    }
     return this.prisma.restaurant.update({
       where: { id },
-      data: content !== undefined ? { ...data, content: content as any } : data,
+      data: updates,
     });
   }
 
