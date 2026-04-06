@@ -17,7 +17,92 @@ const destinations = [
     imgUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1920&q=85',
     currentWeather: '22°C', lat: 41.3851, lng: 2.1734, radiusKm: 25,
-    content: { description: 'Katalonijos sostinė — miestas su unikaliu charakteriu.', highlights: ['Sagrada Familia', 'Park Güell', 'La Boqueria', 'Gotikinis kvartalas'], flightHours: 3.5, minDailyBudget: 60, startingPrice: 1230 },
+    content: {
+      description: 'Gaudžio architektūra, Viduržemio jūra ir kosmopolitiška energija.',
+      highlights: ['Sagrada Família', 'Park Güell', 'La Boqueria', 'Barceloneta paplūdimys'],
+      flightHours: 3,
+      minDailyBudget: 90,
+      startingPrice: 950,
+      cost: { budget: '€90–120', mid: '€150–200', comfort: '€250–400' },
+      tags: [
+        { text: 'Gaudžio miestas', color: 'org' },
+        { text: 'Paplūdimys ir architektūra', color: 'blu' },
+        { text: 'Tapas kultūra', color: 'grn' },
+      ],
+      weather: [
+        { month: 'Sausis', temp: 13, rain: 40, quality: 'ok' },
+        { month: 'Vasaris', temp: 14, rain: 35, quality: 'ok' },
+        { month: 'Kovas', temp: 16, rain: 40, quality: 'good' },
+        { month: 'Balandis', temp: 18, rain: 45, quality: 'good' },
+        { month: 'Gegužė', temp: 21, rain: 45, quality: 'best' },
+        { month: 'Birželis', temp: 25, rain: 25, quality: 'best' },
+        { month: 'Liepa', temp: 29, rain: 20, quality: 'best' },
+        { month: 'Rugpjūtis', temp: 29, rain: 60, quality: 'good' },
+        { month: 'Rugsėjis', temp: 26, rain: 65, quality: 'best' },
+        { month: 'Spalis', temp: 21, rain: 80, quality: 'good' },
+        { month: 'Lapkritis', temp: 16, rain: 55, quality: 'ok' },
+        { month: 'Gruodis', temp: 13, rain: 45, quality: 'ok' },
+      ],
+      why: [
+        { color: 'o', title: 'Gaudžio architektūra', description: 'Sagrada Família, Casa Batlló, Park Güell — visi per pėsčiojo atstumą. Jokiame kitame mieste nėra tokio architektūros koncentrato.' },
+        { color: 'b', title: 'Paplūdimys mieste', description: 'Barceloneta yra 20 minučių nuo Gotikos rajono. Ryte muziejai, po pietų — jūra. Abu pasauliai vienoje dienoje.' },
+        { color: 'g', title: 'Maistas ir rinkos', description: 'La Boqueria, tapas barų gatvės El Born rajone, šviežia jūros gėrybių pasiūla. Maistas čia yra kultūros dalis.' },
+      ],
+      compare: {
+        without: [
+          'Sagrada Família be bilieto — stosite 2–3h eilėje',
+          'Park Güell monumentinė zona — ribota prieiga be bilieto',
+          'Casa Batlló — galite praeiti pro šalį nematę vidaus',
+          'Flamenco šou be rezervacijos vakarą — nepateksite',
+        ],
+        with: [
+          'Sagrada Família bilietai — pirkite 3 sav. iš anksto, rinkitės laikotarpį su gido',
+          'Park Güell bilietai — €10, iš anksto internetu',
+          'Casa Batlló Magic Night bilietas — €45, unikalus naktinis apsilankymas',
+          'Tablao Cordobes arba Los Tarantos — rezervuokite internetu',
+        ],
+      },
+      tips: '<p>T-10 bilietas metro — 10 kelionių €11,35. Pigiausia transporto galimybė.</p><p>Gaudžio objektai — pirkite VISUS bilietus iš anksto internetu. Sagrada Família — mažiausiai 3 savaites iš anksto.</p><p>La Boqueria savaitgaliais pilna turistų — eikite darbo dienomis prieš 10:00 arba apsilankykite Mercat de Santa Caterina.</p>',
+      emergency: { police: '112', ambulance: '112', embassy: '+34 93 488 2410', code: '+34', note: 'Lietuvos konsulatas Barselonoje.' },
+      featuredAttractionCount: 2,
+      totalAttractions: 10,
+      totalFoodSpots: 10,
+      soldCount: 312,
+      plan: {
+        destinationId: 'barcelona',
+        costs: { flights: 160, hotel: 700, food: 400, transport: 60, activities: 150 },
+        days: [
+          {
+            day: 1,
+            title: 'Gaudžio architektūra',
+            items: [
+              { type: 'flight', name: 'Vilnius → Barselona', description: 'Ryanair · El Prat · 3 val.', price: '€70' },
+              { type: 'activity', name: 'Sagrada Família', description: 'Gaudžio šedevras — nepaprastas iš bet kurio kampo.', price: '€26' },
+              { type: 'activity', name: 'Casa Batlló', description: 'Nuostabi fasado detalė — žvynai ir kaukolės.', price: '€35' },
+              { type: 'food', name: 'Bar Calders', description: 'Tradiciniai tapas Sant Antoni rajone.', price: '€€' },
+            ],
+          },
+          {
+            day: 2,
+            title: 'Park Güell ir Barseloneta',
+            items: [
+              { type: 'activity', name: 'Park Güell', description: 'Mozaikinės terasos ir miesto panorama.', price: '€10' },
+              { type: 'activity', name: 'Barceloneta paplūdimys', description: 'Auksinės smiltelės ir Viduržemio jūra.', price: 'Nemokama' },
+              { type: 'food', name: 'La Cova Fumada', description: 'Tikras vietinis restoranas prie jūros.', price: '€€' },
+            ],
+          },
+          {
+            day: 3,
+            title: 'Gotikos rajonas ir La Boqueria',
+            items: [
+              { type: 'activity', name: 'La Boqueria', description: 'Spalvingas turgus La Rambla gatvėje.', price: 'Nemokama' },
+              { type: 'activity', name: 'Gotikos rajonas', description: 'Viduramžių labirintas — Romos laikų liekanos.', price: 'Nemokama' },
+              { type: 'flight', name: 'Barselona → Vilnius', description: 'Ryanair · El Prat · 3 val.', price: '€70' },
+            ],
+          },
+        ],
+      },
+    },
   },
   {
     id: 'lisbon', name: 'Lisabona', country: 'Portugalija',
@@ -25,7 +110,83 @@ const destinations = [
     imgUrl: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=1920&q=85',
     currentWeather: '18°C', lat: 38.7169, lng: -9.1395, radiusKm: 20,
-    content: { description: 'Europos seniausias sostinių miestas ant septynių kalvų.', highlights: ['Alfama', 'Belėmo bokštas', 'Jerónimos vienuolynas', 'LX Factory'], flightHours: 4, minDailyBudget: 50, startingPrice: 980 },
+    content: {
+      description: 'Tramvajai, Alfama rajonas ir pasaulio geriausias „pastel de nata".',
+      highlights: ['Alfama rajonas', 'Belém bokštas', 'Jerónimos vienuolynas', 'Sintra'],
+      flightHours: 3.5,
+      minDailyBudget: 75,
+      startingPrice: 900,
+      cost: { budget: '€75–100', mid: '€130–180', comfort: '€200–320' },
+      tags: [
+        { text: 'Fado kultūra', color: 'org' },
+        { text: 'Atradimų era', color: 'blu' },
+        { text: 'Pigiausia Vakarų Europa', color: 'grn' },
+      ],
+      weather: [
+        { month: 'Sausis', temp: 12, rain: 80, quality: 'ok' },
+        { month: 'Vasaris', temp: 13, rain: 70, quality: 'ok' },
+        { month: 'Kovas', temp: 15, rain: 55, quality: 'good' },
+        { month: 'Balandis', temp: 18, rain: 45, quality: 'good' },
+        { month: 'Gegužė', temp: 21, rain: 35, quality: 'best' },
+        { month: 'Birželis', temp: 24, rain: 15, quality: 'best' },
+        { month: 'Liepa', temp: 28, rain: 5, quality: 'best' },
+        { month: 'Rugpjūtis', temp: 28, rain: 5, quality: 'best' },
+        { month: 'Rugsėjis', temp: 25, rain: 25, quality: 'best' },
+        { month: 'Spalis', temp: 20, rain: 65, quality: 'good' },
+        { month: 'Lapkritis', temp: 15, rain: 100, quality: 'ok' },
+        { month: 'Gruodis', temp: 12, rain: 100, quality: 'ok' },
+      ],
+      why: [
+        { color: 'o', title: 'Pigiausia Vakarų Europoje', description: 'Puikus restoranas kainuos €12–18 asmeniui. Stovyklavimo bilietai vietiniame bare — €1,20. Lisabona suteikia Vakarų Europos patirtį už Rytų Europos kainas.' },
+        { color: 'b', title: 'Istorija kiekvienoje gatvėje', description: 'Alfama išliko nepakitusi po 1755 m. žemės drebėjimo. Jerónimos vienuolynas žymi Atradimų epochą. Belém bokštas — 500 metų senas keliautojų išvykimo taškas.' },
+        { color: 'g', title: 'Sintra dienos išvyka', description: 'Per 40 minučių traukiniu — romantiški rūmai, mistinės pilis ir nuostabūs sodai. Sintra yra UNESCO paveldas ir viena spalvingiausių vietų Europoje.' },
+      ],
+      compare: {
+        without: [
+          'Jerónimos vienuolynas savaitgalį — pusvalandžio eilė',
+          'Belém bokštas — laukimas saulėkaitoje',
+          'Sintra rūmai — kamuoja minios',
+          'Fado vakaras be rezervacijos — populiariausiose vietose nebus vietų',
+        ],
+        with: [
+          'Jerónimos — bilietai internetu iš anksto, €15',
+          'Belém bokštas — anksti rytą, €8',
+          'Sintra — darbo dieną, ankstyvas rytas, bilietai internetu',
+          'Mesa de Frades arba Tasca do Chico — rezervuokite iš anksto',
+        ],
+      },
+      tips: '<p>Viva Viagem kortelė — transporto kortelė, tinka autobusams, metro, tramvajams ir traukiniams į Sintrą.</p><p>28-asis tramvajus — vietinis, o ne turistinis. Važiuokite ryte, vengdami spūsties.</p><p>„Pastel de nata" — originalas tik Pastéis de Belém (nuo 1837 m.), mažiau nei 500 m nuo Jerónimos.</p>',
+      emergency: { police: '112', ambulance: '112', embassy: '+351 213 822 611', code: '+351', note: 'Lietuvos ambasada Lisabonoje.' },
+      featuredAttractionCount: 2,
+      totalAttractions: 8,
+      totalFoodSpots: 8,
+      soldCount: 287,
+      plan: {
+        destinationId: 'lisbon',
+        costs: { flights: 180, hotel: 600, food: 350, transport: 50, activities: 120 },
+        days: [
+          {
+            day: 1,
+            title: 'Alfama ir istorinis centras',
+            items: [
+              { type: 'flight', name: 'Vilnius → Lisabona', description: 'Ryanair · Humberto Delgado · 3,5 val.', price: '€75' },
+              { type: 'activity', name: 'Alfama rajonas', description: 'Siauri maurai gatveliai, fado muzika, panoraminiai taškai.', price: 'Nemokama' },
+              { type: 'activity', name: 'São Jorge pilis', description: '11 a. maurų pilis su panoraminiu vaizdu.', price: '€10' },
+              { type: 'food', name: 'Time Out Market', description: 'Geriausių Lisabonos restoranų rinktinė vienoje vietoje.', price: '€€' },
+            ],
+          },
+          {
+            day: 2,
+            title: 'Belém ir Sintra',
+            items: [
+              { type: 'activity', name: 'Jerónimos vienuolynas', description: 'Manueline architektūros šedevras, Vasco da Gama kapas.', price: '€15' },
+              { type: 'activity', name: 'Belém bokštas', description: 'XVI a. tvirtovė prie Tejo upės — ikona.', price: '€8' },
+              { type: 'activity', name: 'Sintra dienos išvyka', description: 'Pena rūmai ir mistiniai sodai — 40 min. traukiniu.', price: '€14' },
+            ],
+          },
+        ],
+      },
+    },
   },
   {
     id: 'kyoto', name: 'Kiotas', country: 'Japonija',
@@ -33,7 +194,82 @@ const destinations = [
     imgUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1920&q=85',
     currentWeather: '16°C', lat: 35.0116, lng: 135.7681, radiusKm: 15,
-    content: { description: 'Senoji Japonijos sostinė, tūkstančio šventyklų miestas.', highlights: ['Fushimi Inari', 'Arašijama bambukų miškas', 'Kinkaku-ji', 'Gion kvartalas'], flightHours: 11, minDailyBudget: 70, startingPrice: 2100 },
+    content: {
+      description: 'Šventyklos, geiša ir „sakura" žiedai — Japonijos siela.',
+      highlights: ['Fushimi Inari šventykla', 'Arašijamos bambukai', 'Gion rajonas', 'Kinkaku-ji'],
+      flightHours: 11,
+      minDailyBudget: 100,
+      startingPrice: 2200,
+      cost: { budget: '€100–140', mid: '€180–250', comfort: '€320–500' },
+      tags: [
+        { text: 'Šventyklų miestas', color: 'org' },
+        { text: 'Sakura sezonas', color: 'grn' },
+        { text: 'Geiša kultūra', color: 'blu' },
+      ],
+      weather: [
+        { month: 'Sausis', temp: 5, rain: 50, quality: 'ok' },
+        { month: 'Vasaris', temp: 6, rain: 55, quality: 'ok' },
+        { month: 'Kovas', temp: 10, rain: 90, quality: 'good' },
+        { month: 'Balandis', temp: 16, rain: 95, quality: 'best' },
+        { month: 'Gegužė', temp: 21, rain: 125, quality: 'best' },
+        { month: 'Birželis', temp: 25, rain: 165, quality: 'ok' },
+        { month: 'Liepa', temp: 29, rain: 190, quality: 'ok' },
+        { month: 'Rugpjūtis', temp: 31, rain: 145, quality: 'ok' },
+        { month: 'Rugsėjis', temp: 25, rain: 155, quality: 'good' },
+        { month: 'Spalis', temp: 19, rain: 90, quality: 'best' },
+        { month: 'Lapkritis', temp: 13, rain: 70, quality: 'best' },
+        { month: 'Gruodis', temp: 7, rain: 50, quality: 'ok' },
+      ],
+      why: [
+        { color: 'o', title: 'Sakura sezonas', description: 'Balandžio pradžia — vyšnių žiedai apgaubia šventyklas ir parkus rožiniu šydu. Maruyama parkas naktį su apšviesta sakura — neužmirštamas vaizdas.' },
+        { color: 'b', title: '17 UNESCO objektų viename mieste', description: 'Kinkaku-ji, Ryoan-ji, Nijo pilis ir kiti — visi pasiekiami autobusu. Tokio kultūrinio tankio kitur Japonijoje nėra.' },
+        { color: 'g', title: 'Gion rajonas vakare', description: 'Šimtametės medinės namo eilės, tradiciniai restoranai, galimybė pamatyti geišą. Gion yra vienintelis rajonas Japonijoje, kur ši kultūra dar gyva.' },
+      ],
+      compare: {
+        without: [
+          'Fushimi Inari vartai dieną — minios turistų',
+          'Arašijama bambukai 10:00–14:00 — spūstis',
+          'Populiarūs ryokan viešbučiai be rezervacijos',
+          'Nishiki turgus pietų metu — negalėsi judėti',
+        ],
+        with: [
+          'Fushimi Inari — eikite 6:00 arba po 18:00, visiškai tuščia',
+          'Arašijama — anksti ryte iki 8:00, bambukai be žmonių',
+          'Ryokan — rezervuokite 2–3 mėnesius iš anksto',
+          'Nishiki — eikite 9:00 atidarymui',
+        ],
+      },
+      tips: '<p>IC kortelė (Suica/ICOCA) — visiems transporto rūšims Japonijoje, įskaitant convenience store pirkimus.</p><p>Kioto autobusų dienos bilietas — ¥600 (€3,80). Visi pagrindiniai objektai pasiekiami.</p><p>Geišos fotografavimas be leidimo Gion rajone — nemandagu ir draudžiama kai kuriose gatvėse. Stebėkite iš pagarbaus atstumo.</p>',
+      emergency: { police: '110', ambulance: '119', embassy: '+81 3-3203-9475', code: '+81', note: 'Lietuvos ambasada Tokijuje, konsulinis padengimas Kiote.' },
+      featuredAttractionCount: 2,
+      totalAttractions: 8,
+      totalFoodSpots: 8,
+      soldCount: 198,
+      plan: {
+        destinationId: 'kyoto',
+        costs: { flights: 900, hotel: 800, food: 400, transport: 100, activities: 200 },
+        days: [
+          {
+            day: 1,
+            title: 'Atvykimas ir Gion rajonas',
+            items: [
+              { type: 'flight', name: 'Vilnius → Kiotas (per Frankfurtą)', description: 'Lufthansa + ANA · Osaka KIX · 12 val.', price: '€400' },
+              { type: 'activity', name: 'Gion rajonas vakare', description: 'Tradicinės gatvės, geišų kultūra, tradiciniai restoranai.', price: 'Nemokama' },
+              { type: 'food', name: 'Nishiki turgus', description: 'Japoniškas maistas ant grotelių ir gatvės užkandžiai.', price: '€€' },
+            ],
+          },
+          {
+            day: 2,
+            title: 'Fushimi Inari ir Arašijama',
+            items: [
+              { type: 'activity', name: 'Fushimi Inari', description: '10 000 oranžinių vartų kalne — ryte be minių.', price: 'Nemokama' },
+              { type: 'activity', name: 'Arašijamos bambukai', description: 'Mistinis bambukinių medžių miškas netoli upės.', price: 'Nemokama' },
+              { type: 'activity', name: 'Kinkaku-ji', description: 'Auksinis paviljonas — vienas gražiausių Japonijoje.', price: '€3' },
+            ],
+          },
+        ],
+      },
+    },
   },
   {
     id: 'marrakech', name: 'Marakesas', country: 'Marokas',
@@ -81,7 +317,45 @@ const destinations = [
     imgUrl: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=1200&q=85',
     heroImageUrl: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=1920&q=85',
     currentWeather: '12°C', lat: 52.3676, lng: 4.9041, radiusKm: 15,
-    content: { description: 'Kanalų miestas — dviračiai, muziejai ir tulpių laukai.', highlights: ['Rijksmuseum', 'Ano Frank namai', 'Kanalai', 'Keukenhof tulpės'], flightHours: 2.5, minDailyBudget: 75, startingPrice: 1180 },
+    content: {
+      description: 'Kanalų miestas — dviračiai, muziejai ir tulpių laukai.',
+      highlights: ['Rijksmuseum', 'Ano Frank namai', 'Kanalai', 'Keukenhof tulpės'],
+      flightHours: 2.5, minDailyBudget: 80, startingPrice: 1200,
+      cost: { budget: '€80–110', mid: '€140–190', comfort: '€230–350' },
+      tags: [{ text: 'Kanalų miestas', color: 'blu' }, { text: 'Dviračių rojus', color: 'grn' }, { text: 'Tulpių sezonas', color: 'grn' }],
+      weather: [
+        { month: 'Sau', temp: '5°', quality: 'ok' }, { month: 'Vas', temp: '6°', quality: 'ok' },
+        { month: 'Kov', temp: '9°', quality: 'ok' }, { month: 'Bal', temp: '12°', quality: 'best' },
+        { month: 'Geg', temp: '16°', quality: 'best' }, { month: 'Bir', temp: '19°', quality: 'best' },
+        { month: 'Lie', temp: '21°', quality: 'good' }, { month: 'Rgp', temp: '21°', quality: 'good' },
+        { month: 'Rgs', temp: '18°', quality: 'good' }, { month: 'Spa', temp: '13°', quality: 'ok' },
+        { month: 'Lap', temp: '8°', quality: 'ok' }, { month: 'Grd', temp: '5°', quality: 'ok' },
+      ],
+      why: [
+        { color: 'g', title: 'Dviračių miestas', description: 'Nuomojam dviratį ir rodome maršrutus pro vietinių mėgstamas vietas.' },
+        { color: 'b', title: 'Muziejų strategija', description: 'Van Gogh ryte, Rijks popiet — be eilių, optimalus laikas.' },
+        { color: 'o', title: 'Tulpių sezonas', description: 'Balandžio pradžia — Keukenhof žydi, tik 30min nuo miesto.' },
+      ],
+      compare: {
+        without: ['Anės Frank be bilieto — nepateksi', 'Van Gogh muziejus popiet — pilna', 'Pietūs Damrak gatvėje — turistinė pasala', 'Dviratis be maršruto — pasiklysti'],
+        with: ['Anės Frank bilietai — nupirkti iš anksto', 'Van Gogh 9:00 — ramiai apžiūri', 'Pietūs Albert Cuyp turguje — pigiau ir skaniau', 'Dviratis su mūsų maršrutu — per vietinių rajonus'],
+      },
+      tips: '<p style="margin-bottom:8px">I amsterdam City Card — neapsimoka. Geriau pirk bilietus atskirai.</p><p style="margin-bottom:8px">Dviratį nuomok MacBike arba Swapfiets (€8/dieną) — miestą apžiūri 3x greičiau.</p><p>OV-chipkaart (€7,50 + papildymas) — visiems transporto rūšims.</p>',
+      emergency: { police: '112', ambulance: '112', embassy: '+31 70 385 4900', code: '+31', note: 'Lietuvos ambasada Hagoje.' },
+      plan: {
+        destinationId: 'amsterdam',
+        costs: { flights: 200, hotel: 900, food: 350, transport: 70, activities: 150 },
+        days: [
+          { label: '1 diena', title: 'Kanalai ir muziejai', activities: ['Rytas: Rijksmuseum (9:00)', 'Popietė: Van Gogh muziejus', 'Vakaras: Kanalų pasivaikščiojimas'] },
+          { label: '2 diena', title: 'Istorija ir Jordaan', activities: ['Rytas: Anės Frank namai (bilietai iš anksto)', 'Popietė: Jordaan rajonas', 'Vakaras: Brouwerij \'t IJ alaus darykla'] },
+          { label: '3 diena', title: 'Turgus ir Vondelpark', activities: ['Rytas: Albert Cuyp turgus', 'Popietė: Vondelpark', 'Vakaras: Foodhallen street food'] },
+        ],
+      },
+      featuredAttractionCount: 2,
+      totalAttractions: 10,
+      totalFoodSpots: 10,
+      soldCount: 234,
+    },
   },
   {
     id: 'prague', name: 'Praga', country: 'Čekija',
@@ -224,6 +498,28 @@ const attractions: {
   { id: 'ryoanji', name: 'Ryoan-ji Rock Garden', lat: 35.0345, lng: 135.7183, category: 'gem', description: 'The world\'s most famous Zen rock garden — 15 stones, none visible all at once.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: '¥600 · 1h', openingHours: '8:00–17:00', bestTime: 'Weekday morning', content: { hook: 'No one knows who made it or what it means. That ambiguity is the point.', tip: 'Sit and observe for at least 15 minutes — it changes as your mind quiets.' } },
   { id: 'philosophers-path', name: 'Philosopher\'s Path', lat: 35.0271, lng: 135.7924, category: 'gem', description: '2-km stone path along a canal — lined with hundreds of cherry trees.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: 'Free · 1h walk', openingHours: 'Always open', bestTime: 'Late March to early April (cherry blossom)', content: { hook: 'Named after philosopher Nishida Kitaro who walked it daily in meditation.', tip: 'The coffee shops and galleries along the path are perfect for a slow morning.' } },
   { id: 'heian-jingu', name: 'Heian Jingu Shrine', lat: 35.0162, lng: 135.7826, category: 'popular', description: 'Vermillion Shinto shrine with Japan\'s finest stroll garden.', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', priceAndDuration: 'Shrine free, garden ¥600 · 1–2h', openingHours: '6:00–18:00 (garden 8:30–17:30)', bestTime: 'Late April (weeping cherry in garden)', content: { hook: 'Built in 1895 to commemorate the 1,100th anniversary of Kyoto as capital.', tip: 'The garden iris bloom in June is one of Kyoto\'s most spectacular seasonal sights.' } },
+
+  // Berlin
+  { id: 'brandenburg-gate', name: 'Brandenburgo vartai', lat: 52.5163, lng: 13.3777, category: 'popular', description: 'Berlino simbolis — 18 a. neoklasikinis vartai, stovintys ant buvusios sienos.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: 'Nemokama · 30min', openingHours: 'Visada atidaryti', bestTime: 'Saulėtekis arba naktis', content: { hook: 'Per Šaltąjį karą vartai buvo uždaryti 28 metus — juos atidarė 1989 m. sienos griūtis.', tip: 'Ateikite anksti rytą arba vėlai vakare — dienos metu minios turistų.' } },
+  { id: 'reichstag', name: 'Reichstagas', lat: 52.5186, lng: 13.3762, category: 'popular', description: 'Vokietijos parlamento pastatas su stikline kupola ir panoraminiais miesto vaizdais.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: 'Nemokama (registracija būtina) · 1–2h', openingHours: '8:00–24:00', bestTime: 'Saulėlydis', content: { hook: 'Normanno Fosterio stiklinė kupola simbolizuoja skaidrumą demokratijoje.', tip: 'Registruokitės internetu iš anksto — be rezervacijos neįleidžia.' } },
+  { id: 'east-side-gallery', name: 'Rytų šoninė galerija', lat: 52.5052, lng: 13.4392, category: 'popular', description: '1,3 km ilgio buvusios Berlyno sienos atviro oro meno galerija — 105 paveikslai.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: 'Nemokama · 1h', openingHours: 'Visada atidaryti', bestTime: 'Rytas', content: { hook: 'Ilgiausias išlikęs Berlyno sienos fragmentas.', tip: 'Ieškokite ikoninio „Broliško bučinio" paveikslo — jis yra viduryje galerijos.' } },
+  { id: 'museum-island', name: 'Muziejų sala', lat: 52.5167, lng: 13.4017, category: 'gem', description: 'UNESCO pasaulio paveldo vieta — penkių pasaulinio lygio muziejų kompleksas Spree upėje.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: '€19 dienos bilietas visiems · 4–6h', openingHours: '10:00–20:00', bestTime: 'Ketvirtadienis (ilgesnis darbo laikas)', content: { hook: 'Pergamo muziejuje yra vienas didžiausių senovės altorių pasaulyje.', tip: 'Pergamo muziejus rekonstruojamas iki 2037 m. — patikrinkite, kurie eksponatai rodomi.' } },
+  { id: 'checkpoint-charlie', name: 'Čekpointo Čarlio', lat: 52.5075, lng: 13.3904, category: 'popular', description: 'Garsiausias buvęs Rytų-Vakarų perėjimo punktas Šaltojo karo metu.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: 'Nemokamas žiūrėjimas / €15 muziejus · 1h', openingHours: 'Muziejus 9:00–22:00', bestTime: 'Ankstyvas rytas (mažiau turistų)', content: { hook: '1961 m. čia akis į akį susistojo amerikiečių ir sovietų tankai.', tip: 'Originalus postas buvo nugriautas 1990 m. — dabartinis yra rekonstrukcija.' } },
+  { id: 'holocaust-memorial', name: 'Holokausto memorialas', lat: 52.5138, lng: 13.3788, category: 'gem', description: '2711 betono stulpų labirintas, skirtas atminti nužudytus Europos žydus.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: 'Nemokamas · 30–60min', openingHours: 'Memorialas visada / informacinis centras 10:00–20:00', bestTime: 'Bet kuriuo metu', content: { hook: 'Architektas Peteris Eisenmanas sąmoningai nepaaiškino memorialo simbolikos.', tip: 'Nusileidę į informacinį centrą apačioje gausite kontekstą ir individualias istorijas.' } },
+  { id: 'berlin-wall-memorial', name: 'Berlyno sienos memorialas', lat: 52.5352, lng: 13.3906, category: 'gem', description: 'Autentiška sienos sekcija su apsaugos juosta — geriausiai išsilaikiusi vieta.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: 'Nemokamas · 1–2h', openingHours: 'Visada atidaryti / dokumentacijos centras 10:00–18:00', bestTime: 'Rytas', content: { hook: 'Vienintelė vieta, kur galite pamatyti visą sienos architektūrą — du pastatus ir apsaugos juostą.', tip: 'Perimtro kortelė viršuje suteikia unikalų vaizdą į buvusią mirties juostą.' } },
+  { id: 'tiergarten', name: 'Tīrgartenas', lat: 52.5145, lng: 13.3501, category: 'popular', description: 'Berlyno centrinis parkas — 210 ha miško ir takų miesto širdyje.', img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800', priceAndDuration: 'Nemokamas · 1–3h', openingHours: 'Visada atidaryti', bestTime: 'Savaitgalio rytas', content: { hook: 'Anksčiau buvęs karališkųjų medžioklių miškas — tapęs parku 1830 m.', tip: 'Nuomokite dviratį ir apvažiuokite visą parką — taip sutaupysite laiko.' } },
+
+  // Amsterdam
+  { id: 'rijksmuseum', name: 'Rijksmuseum', lat: 52.3600, lng: 4.8852, category: 'popular', description: 'Netherlands\' national museum — Rembrandt, Vermeer, and Dutch Golden Age masterpieces.', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', priceAndDuration: '€22.50 · 2–4h', openingHours: '9:00–17:00', bestTime: 'Weekday morning', content: { hook: 'The Night Watch is 3.6m × 4.4m — far larger than most visitors expect.', tip: 'Book online — the queue without a ticket can be 2 hours. Come at 9am sharp.' } },
+  { id: 'anne-frank-house', name: 'Anne Frank House', lat: 52.3752, lng: 4.8840, category: 'popular', description: 'The hidden annex where Anne Frank hid for two years before her arrest in 1944.', img: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800', priceAndDuration: '€16 · 1.5h', openingHours: '9:00–22:00', bestTime: 'Evening (less crowded)', content: { hook: 'The bookcase that hid the entrance to the annex is still in place.', tip: 'Tickets sell out weeks ahead — only available online at 9am Amsterdam time.' } },
+  { id: 'vondelpark', name: 'Vondelpark', lat: 52.3580, lng: 4.8686, category: 'popular', description: 'Amsterdam\'s beloved city park — cyclists, open-air theatre, and rose gardens.', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', priceAndDuration: 'Free · 1–3h', openingHours: 'Always open', bestTime: 'Weekend afternoon', content: { hook: 'The open-air theatre runs free performances every summer — locals pack the grass.', tip: 'Rent a bike here — it\'s the most Dutch experience you can have for €10.' } },
+  { id: 'van-gogh-museum', name: 'Van Gogh Museum', lat: 52.3584, lng: 4.8811, category: 'popular', description: 'World\'s largest collection of Van Gogh paintings — over 200 works.', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', priceAndDuration: '€22 · 2–3h', openingHours: '9:00–17:00', bestTime: 'Weekday', content: { hook: 'Van Gogh sold only one painting in his lifetime; today his works fetch hundreds of millions.', tip: 'Buy timed entry tickets months in advance — the museum sells out daily in summer.' } },
+  { id: 'canal-ring', name: 'Amsterdam Canal Ring', lat: 52.3676, lng: 4.9041, category: 'popular', description: 'UNESCO-listed 17th-century canal system — 165 canals, 1,500 bridges.', img: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800', priceAndDuration: 'Free to walk · canal cruise €15', openingHours: 'Always open', bestTime: 'Golden hour', content: { hook: 'The canal houses tilt forward intentionally — to hoist goods up without hitting the facade.', tip: 'Rent a kayak for 2 hours — paddling the canals beats any bus tour.' } },
+  { id: 'jordaan', name: 'Jordaan District', lat: 52.3738, lng: 4.8797, category: 'gem', description: 'Amsterdam\'s most charming neighbourhood — indie galleries, brown cafes, flower stalls.', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', priceAndDuration: 'Free · 2–3h', openingHours: 'Always open', bestTime: 'Saturday (market day)', content: { hook: 'Built in the 17th century to house workers and artisans — now one of the priciest areas.', tip: 'The Noordermarkt on Saturday morning is the best farmers\' market in Amsterdam.' } },
+  { id: 'stedelijk-museum', name: 'Stedelijk Museum', lat: 52.3580, lng: 4.8799, category: 'gem', description: 'Amsterdam\'s museum of modern and contemporary art — Mondrian to Warhol.', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', priceAndDuration: '€22.50 · 2h', openingHours: '10:00–18:00', bestTime: 'Weekday', content: { hook: 'The white bathtub extension — nicknamed "the bathtub" — opened in 2012 amid controversy.', tip: 'Combine with Rijksmuseum and Van Gogh Museum — they\'re all on Museumplein.' } },
+  { id: 'albert-cuyp-market', name: 'Albert Cuypmarkt', lat: 52.3555, lng: 4.8959, category: 'popular', description: 'Amsterdam\'s largest outdoor market — 260 stalls of food, flowers, and clothing.', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', priceAndDuration: 'Free · 1–2h', openingHours: '9:00–17:00 (Mon–Sat)', bestTime: 'Saturday morning', content: { hook: 'Been running since 1905 — the stroopwafels fresh off the iron are non-negotiable.', tip: 'Come hungry. The herring stand, syrup waffles, and Dutch cheese are essential.' } },
+  { id: 'a-dam-lookout', name: 'A\'DAM Lookout', lat: 52.3842, lng: 4.9017, category: 'popular', description: 'Amsterdam\'s highest observation deck — 360° views from 22 floors up, with a swing.', img: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800', priceAndDuration: '€17.50 · 1h', openingHours: '10:00–22:00', bestTime: 'Sunset', content: { hook: 'The "Over the Edge" swing hangs 100m above the IJ river — not for the faint-hearted.', tip: 'Book the swing separately — it\'s one of the best adrenaline experiences in the city.' } },
+  { id: 'heineken-experience', name: 'Heineken Experience', lat: 52.3579, lng: 4.8913, category: 'popular', description: 'Interactive brewery tour in the original 1867 Heineken factory.', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', priceAndDuration: '€25 (incl. 2 beers) · 1.5h', openingHours: '10:30–19:30', bestTime: 'Afternoon', content: { hook: 'Heineken brewed here until 1988 — moved production but kept the building as a museum.', tip: 'Book online to skip the queue. The "Brew You" experience is surprisingly fun.' } },
 ];
 
 // ─── Restaurants ──────────────────────────────────────────────────────────────
@@ -293,6 +589,25 @@ const restaurants: {
   { id: 'yoshikawa-kyoto', name: 'Yoshikawa', lat: 35.0087, lng: 135.7672, type: 'fine', cuisine: 'Tempura kaiseki', price: '€€€€', openingHours: '11:30–14:00, 17:30–21:00', delivery: false, petFriendly: false, content: { description: 'Counter tempura kaiseki in a serene garden setting — Kyoto at its most refined.', signature: 'Tempura kaiseki course', reviews: [] } },
   { id: 'kakiden-kyoto', name: 'Kakiden', lat: 35.0107, lng: 135.7682, type: 'fine', cuisine: 'Kaiseki', price: '€€€€', openingHours: '12:00–14:30, 17:00–21:00', delivery: false, petFriendly: false, content: { description: 'Renowned kaiseki restaurant in central Kyoto — seasonal flavours, impeccable presentation.', signature: 'Seasonal kaiseki course', reviews: [] } },
   { id: 'imahan-kyoto', name: 'Imahan', lat: 35.0072, lng: 135.7588, type: 'fine', cuisine: 'Sukiyaki/Shabu-shabu', price: '€€€€', openingHours: '11:30–21:00', delivery: false, petFriendly: false, content: { description: 'Premium wagyu sukiyaki and shabu-shabu in private tatami rooms.', signature: 'Wagyu sukiyaki set', reviews: [] } },
+
+  // Berlin
+  { id: 'zur-letzten-instanz', name: 'Zur letzten Instanz', lat: 52.5162, lng: 13.4115, type: 'local', cuisine: 'Tradicinė vokiečių virtuvė', price: '€€', openingHours: '12:00–23:00 (išsk. pirmadienį)', delivery: false, petFriendly: false, content: { description: 'Berlyno seniausias restoranas (1621 m.) — autentiškas soleris ir raudonkopūstis.', signature: 'Kassler su soleriu ir raudonkopūsčiu', reviews: [{ text: 'Tikras Berlyno skonis — privalu aplankyti.', author: 'Klaus M.', rating: '5/5' }] } },
+  { id: 'mustafas-gemuse-kebap', name: 'Mustafa\'s Gemüse Kebap', lat: 52.4947, lng: 13.3881, type: 'popular', cuisine: 'Kebabas', price: '€', openingHours: '10:00–03:00', delivery: false, petFriendly: false, content: { description: 'Kreuzbergo legendinis daržovių kebabas — eilė visada verta laukimo.', signature: 'Daržovių kebabas su feta ir šparagais', reviews: [] } },
+  { id: 'nobelhart-schmutzig', name: 'Nobelhart & Schmutzig', lat: 52.5067, lng: 13.3866, type: 'fine', cuisine: 'Modernioji vokiečių', price: '€€€€', openingHours: '18:30–00:00 (išsk. sekmadienį–pirmadienį)', delivery: false, petFriendly: false, content: { description: 'Vienas žvaigždžių restoranų — tik vietiniai produktai, be puošybos.', signature: '10 patiekalų degustacinis meniu', reviews: [] } },
+  { id: 'spreegold-berlin', name: 'Spreegold', lat: 52.5139, lng: 13.4230, type: 'breakfast', cuisine: 'Kavinė / pusryčiai', price: '€€', openingHours: '9:00–17:00', delivery: false, petFriendly: true, content: { description: 'Mėgstamiausia berlyniečių brunch vieta prie Šprė upės.', signature: 'Avokadų skrebučiai + holubtsy', reviews: [] } },
+  { id: 'katz-orange-berlin', name: 'Katz Orange', lat: 52.5268, lng: 13.4005, type: 'local', cuisine: 'Ūkio virtuvė', price: '€€€', openingHours: '18:00–23:00', delivery: false, petFriendly: false, content: { description: 'Ūkio meniu kiekvieną savaitę — šviežūs vietiniai produktai istoriniame pastote.', signature: '12 val. troškintas kiaulienos kaklas', reviews: [] } },
+
+  // Amsterdam
+  { id: 'de-kas-amsterdam', name: 'De Kas', lat: 52.3571, lng: 4.9259, type: 'fine', cuisine: 'Farm-to-table', price: '€€€€', img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80', openingHours: '12:00–14:00, 18:30–21:30 (Mon–Fri)', delivery: false, petFriendly: false, content: { description: 'Restaurant in a 1926 greenhouse — vegetables harvested 100m from your table.', signature: 'Fixed seasonal menu (changes daily)', reviews: [{ text: 'The freshest, most beautiful meal in Amsterdam.', author: 'Sophie V.', rating: '5/5' }] } },
+  { id: 'van-wonderen-amsterdam', name: 'Van Wonderen Stroopwafels', lat: 52.3731, lng: 4.8946, type: 'popular', cuisine: 'Dutch pastry', price: '€', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80', openingHours: '9:00–19:00', delivery: false, petFriendly: false, content: { description: 'Artisan stroopwafels fresh off the iron — Amsterdam\'s most Instagrammed food stop.', signature: 'Classic stroopwafel + Nutella drizzle', reviews: [] } },
+  { id: 'brouwerij-t-ij', name: 'Brouwerij \'t IJ', lat: 52.3661, lng: 4.9241, type: 'local', cuisine: 'Craft brewery', price: '€€', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80', openingHours: '14:00–20:00', delivery: false, petFriendly: true, content: { description: 'Amsterdam\'s iconic windmill brewery — tasting room inside a working 1814 mill.', signature: 'Columbus IPA + Natte dubbel', reviews: [] } },
+  { id: 'cafe-de-jaren', name: 'Café de Jaren', lat: 52.3684, lng: 4.8951, type: 'breakfast', cuisine: 'Grand café', price: '€€', img: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=800&q=80', openingHours: '10:00–01:00', delivery: false, petFriendly: true, content: { description: 'Amsterdam\'s grandest café — high ceilings, waterfront terrace, all-day menu.', signature: 'Dutch apple pie + fresh orange juice', reviews: [] } },
+  { id: 'foodhallen-amsterdam', name: 'Foodhallen', lat: 52.3634, lng: 4.8694, type: 'popular', cuisine: 'Food hall', price: '€€', img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80', openingHours: '11:00–23:30', delivery: false, petFriendly: false, content: { description: 'Indoor street food market in a converted tram depot — 20+ vendors.', signature: 'Bao buns + craft beer', reviews: [] } },
+  { id: 'brasserie-harkema', name: 'Brasserie Harkema', lat: 52.3718, lng: 4.8952, type: 'local', cuisine: 'Modern French-Dutch', price: '€€€', img: 'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=800&q=80', openingHours: '12:00–23:30', delivery: false, petFriendly: false, content: { description: 'Stylish brasserie in a former tobacco factory near the Spui — Amsterdam favourite.', signature: 'Beef tartare + crème brûlée', reviews: [] } },
+  { id: 'raan-amsterdam', name: 'Raan', lat: 52.3693, lng: 4.9011, type: 'popular', cuisine: 'Thai street food', price: '€€', img: 'https://images.unsplash.com/photo-1562802378-063ec186a863?w=800&q=80', openingHours: '12:00–22:00 (closed Mon)', delivery: true, petFriendly: false, content: { description: 'Authentic Thai street food in the heart of Amsterdam — tiny, always packed.', signature: 'Pad kra pao + mango sticky rice', reviews: [] } },
+  { id: 'moeders-amsterdam', name: 'Moeders', lat: 52.3747, lng: 4.8777, type: 'local', cuisine: 'Dutch home cooking', price: '€€', img: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&q=80', openingHours: '17:00–23:00 (Sat–Sun from 12:00)', delivery: false, petFriendly: false, content: { description: 'Walls covered in family photos, mismatched plates — the most Dutch restaurant experience.', signature: 'Stamppot met rookworst + Dutch apple pie', reviews: [{ text: 'The warmest, most charming restaurant in Amsterdam.', author: 'Anna P.', rating: '5/5' }] } },
+  { id: 'pllek-amsterdam', name: 'Pllek', lat: 52.3882, lng: 4.9086, type: 'local', cuisine: 'Contemporary café-restaurant', price: '€€', img: 'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=800&q=80', openingHours: '10:00–00:00', delivery: false, petFriendly: true, content: { description: 'Container restaurant on the north bank of the IJ — terrace with city skyline views.', signature: 'Grilled fish + natural wine', reviews: [] } },
+  { id: 'teds-amsterdam', name: 'Ted\'s', lat: 52.3773, lng: 4.9005, type: 'breakfast', cuisine: 'Brunch', price: '€€', img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80', openingHours: '8:00–17:00', delivery: false, petFriendly: true, content: { description: 'Amsterdam\'s most popular brunch spot — freshly baked bread, local eggs, great coffee.', signature: 'Eggs Benedict + house granola', reviews: [] } },
 ];
 
 // ─── Hotels ───────────────────────────────────────────────────────────────────
@@ -361,6 +676,20 @@ const hotels: {
   { id: 'daiwa-roynet-kyoto', name: 'Daiwa Roynet Hotel Kyoto-Hachijo', lat: 35.0113, lng: 135.7579, tier: 'mid', area: 'Kyoto Station', pricePerNight: 110, rating: '8.5', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Business hotel efficiency', 'Walk to Kyoto Station', 'Clean and modern'], amenities: ['Wi-Fi', 'Gym', 'Restaurant'], walkTo: '5 min to Kyoto Station', roomTypes: [] } },
   { id: 'piece-hostel-kyoto', name: 'Piece Hostel Kyoto', lat: 35.0090, lng: 135.7558, tier: 'budget', area: 'Gojo', pricePerNight: 25, rating: '8.7', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Second Piece property — more local feel', 'Quiet neighbourhood', 'Bike rental'], amenities: ['Wi-Fi', 'Communal kitchen', 'Bike rental'], walkTo: '15 min to Nishiki by bike', roomTypes: [] } },
   { id: 'hotel-kanra-kyoto', name: 'Hotel Kanra Kyoto', lat: 35.0005, lng: 135.7619, tier: 'mid', area: 'Shimogyo', pricePerNight: 145, rating: '8.9', img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800', content: { highlights: ['Modern machiya aesthetic', 'Tatami areas in rooms', 'In-house Japanese restaurant'], amenities: ['Wi-Fi', 'Restaurant', 'Tatami rooms'], walkTo: '10 min to Nishiki Market', roomTypes: [] } },
+
+  // Berlin
+  { id: 'hotel-adlon-berlin', name: 'Hotel Adlon Kempinski', lat: 52.5163, lng: 13.3812, tier: 'comfort', area: 'Mitte / Brandenburgo vartai', pricePerNight: 480, rating: '9.3', img: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800', content: { highlights: ['Brandenburgo vartų prieigos', 'Istorinis prabangus viešbutis', 'Lorenz Adlon restoranas'], amenities: ['Spa', 'Pool', 'Wi-Fi', 'Gym', 'Restaurant', 'Bar'], walkTo: '2 min iki Brandenburgo vartų', roomTypes: [] } },
+  { id: 'michelberger-berlin', name: 'Michelberger Hotel', lat: 52.5012, lng: 13.4493, tier: 'mid', area: 'Friedrichshain', pricePerNight: 130, rating: '8.9', img: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800', content: { highlights: ['Kūrybinga hipsterio viešbučio atmosfera', 'Šalia East Side Gallery', 'Roko muzika gyvo garso'], amenities: ['Wi-Fi', 'Restaurant', 'Bar', 'Courtyard'], walkTo: '5 min iki East Side Gallery', roomTypes: [] } },
+  { id: 'circus-hostel-berlin', name: 'Circus Hotel Berlin', lat: 52.5296, lng: 13.4048, tier: 'budget', area: 'Mitte', pricePerNight: 45, rating: '9.0', img: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800', content: { highlights: ['Geriausias hostelių Berlyne', 'Naktinis baras su džiazo muzika', 'Šalia Rosenthaler Platz'], amenities: ['Wi-Fi', 'Bar', 'Communal kitchen', 'Tours'], walkTo: '10 min iki Muziejų salos', roomTypes: [] } },
+  { id: 'soho-house-berlin', name: 'Soho House Berlin', lat: 52.5278, lng: 13.4103, tier: 'comfort', area: 'Mitte / Prenzlauer Berg', pricePerNight: 290, rating: '9.1', img: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800', content: { highlights: ['Stogo baseinas', 'Privatus nario klubas + viešbutis', 'Kino salė'], amenities: ['Rooftop pool', 'Spa', 'Wi-Fi', 'Gym', 'Cinema'], walkTo: '10 min iki Brandenburgo vartų', roomTypes: [] } },
+  { id: 'nhow-berlin', name: 'nhow Berlin', lat: 52.4993, lng: 13.4482, tier: 'mid', area: 'Friedrichshain', pricePerNight: 150, rating: '8.6', img: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800', content: { highlights: ['Muzikos tematikos dizainas', 'Šprė upės vaizdas', 'Studija muzikantams'], amenities: ['Wi-Fi', 'Gym', 'Restaurant', 'Bar'], walkTo: '5 min iki East Side Gallery', roomTypes: [] } },
+
+  // Amsterdam
+  { id: 'waldorf-amsterdam', name: 'Waldorf Astoria Amsterdam', lat: 52.3661, lng: 4.8874, tier: 'comfort', area: 'Herengracht', pricePerNight: 650, rating: '9.6', img: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800', content: { highlights: ['Six 17th-century canal houses', 'Michelin-starred Librije\'s Zusje', 'Direct canal access'], amenities: ['Spa', 'Wi-Fi', 'Gym', 'Restaurant', 'Bar'], walkTo: '5 min to Rijksmuseum', roomTypes: [] } },
+  { id: 'pulitzer-amsterdam', name: 'Pulitzer Amsterdam', lat: 52.3729, lng: 4.8838, tier: 'comfort', area: 'Prinsengracht', pricePerNight: 380, rating: '9.2', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', content: { highlights: ['25 interconnected canal houses', 'Private garden', 'Boat tours from the hotel'], amenities: ['Restaurant', 'Bar', 'Wi-Fi', 'Terrace'], walkTo: '5 min to Anne Frank House', roomTypes: [] } },
+  { id: 'conscious-hotel-vondelpark', name: 'Conscious Hotel Vondelpark', lat: 52.3612, lng: 4.8757, tier: 'mid', area: 'Vondelpark', pricePerNight: 145, rating: '8.8', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', content: { highlights: ['Sustainable design hotel', 'Directly on Vondelpark', 'Organic breakfast'], amenities: ['Wi-Fi', 'Restaurant', 'Bike rental'], walkTo: '5 min to Van Gogh Museum', roomTypes: [] } },
+  { id: 'generator-amsterdam', name: 'Generator Amsterdam', lat: 52.3537, lng: 4.9021, tier: 'budget', area: 'De Pijp', pricePerNight: 35, rating: '8.6', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800', content: { highlights: ['Best hostel in Amsterdam', 'Rooftop bar with city views', 'Near Albert Cuypmarkt'], amenities: ['Wi-Fi', 'Bar', 'Communal kitchen', 'Tours'], walkTo: '10 min to Rijksmuseum', roomTypes: [] } },
+  { id: 'v-hotel-amsterdam', name: 'V Hotel Amsterdam', lat: 52.3632, lng: 4.8886, tier: 'mid', area: 'Museum Quarter', pricePerNight: 180, rating: '8.9', img: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800', content: { highlights: ['Steps from Museumplein', 'Modern design rooms', 'Excellent breakfast'], amenities: ['Wi-Fi', 'Restaurant', 'Bar'], walkTo: '2 min to Rijksmuseum', roomTypes: [] } },
 ];
 
 // ─── Geo-matching helper ──────────────────────────────────────────────────────
