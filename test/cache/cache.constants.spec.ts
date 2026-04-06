@@ -3,10 +3,6 @@ import {
   DEST_LIST_TTL,
   DEST_CONTENT_KEY,
   DEST_CONTENT_TTL,
-  DEST_ATTRACTIONS_KEY,
-  DEST_ATTRACTIONS_TTL,
-  DEST_FOOD_KEY,
-  DEST_FOOD_TTL,
   DEST_MAP_KEY,
   DEST_MAP_TTL,
   PLAN_KEY,
@@ -35,14 +31,6 @@ describe('cache.constants', () => {
     expect(DEST_CONTENT_TTL).toBe(21600);
   });
 
-  it('DEST_ATTRACTIONS_KEY generates keyed string', () => {
-    expect(DEST_ATTRACTIONS_KEY('paris')).toBe('dest:paris:attractions');
-  });
-
-  it('DEST_FOOD_KEY generates keyed string', () => {
-    expect(DEST_FOOD_KEY('paris')).toBe('dest:paris:food-spots');
-  });
-
   it('DEST_MAP_KEY generates keyed string', () => {
     expect(DEST_MAP_KEY('paris')).toBe('dest:paris:map-data');
   });
@@ -60,8 +48,6 @@ describe('cache.constants', () => {
   });
 
   it('TTL values are positive numbers', () => {
-    expect(DEST_ATTRACTIONS_TTL).toBe(604800);
-    expect(DEST_FOOD_TTL).toBe(604800);
     expect(DEST_MAP_TTL).toBe(604800);
     expect(PLAN_TTL).toBe(21600);
     expect(PRICE_TTL).toBe(1800);

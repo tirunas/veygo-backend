@@ -12,6 +12,8 @@ import {
   POI_HOTELS_TTL,
   DEST_CONTENT_KEY,
   DEST_CONTENT_TTL,
+  DEST_MAP_KEY,
+  DEST_MAP_TTL,
 } from '../../cache/cache.constants';
 import { DestinationsRepository } from './destinations.repository';
 import type { MapData } from './destinations.types';
@@ -54,10 +56,14 @@ export class DestinationDetailService {
   }
 
   async findMapData(id: string): Promise<MapData | null> {
+    const cached = await this.cacheManager.get<MapData>(DEST_MAP_KEY(id));
+    if (cached) return cached;
+
     const destination = await this.getDestinationWithCoords(id);
-    const [attractionPins, restaurantPins] = await Promise.all([
+    const [attractionPins, restaurantPins, hotelPins] = await Promise.all([
       this.attractionsService.findPinsByDestination(id),
       this.restaurantsService.findPinsByDestination(id),
+      this.hotelsService.findPinsByDestination(id),
     ]);
 
     const attractions = attractionPins.map((pin) => ({
@@ -77,17 +83,20 @@ export class DestinationDetailService {
       priceRange: pin.price,
     }));
 
-    return {
+    const mapData: MapData = {
       centerLat: destination.lat || 0,
       centerLng: destination.lng || 0,
       zoom: 12,
       attractions,
       foodSpots,
     };
+
+    await this.cacheManager.set(DEST_MAP_KEY(id), mapData, DEST_MAP_TTL * 1000);
+    return mapData;
   }
 
   private async getDestinationWithCoords(id: string) {
-    const cached = await this.cacheManager.get(DEST_CONTENT_KEY(id));
+    const cached = await this.cacheManager.get<any>(DEST_CONTENT_KEY(id));
     if (cached) return cached;
 
     const record = await this.destinationsRepository.findById(id);

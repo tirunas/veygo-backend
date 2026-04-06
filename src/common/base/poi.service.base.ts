@@ -28,7 +28,7 @@ export abstract class PoiServiceBase<T> {
   /**
    * Transform a Prisma row to the entity type.
    */
-  protected abstract toEntity(row: any): T;
+  protected abstract toEntity(row: Record<string, unknown>): T;
 
   /**
    * Cache-aside pattern for fetching POI by destination.

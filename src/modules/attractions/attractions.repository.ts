@@ -21,6 +21,11 @@ export class AttractionsRepository extends PoiRepositoryBase {
     return 'attractionId';
   }
 
+  async findByDestination(destinationId: string) {
+    const rows = await super.findByDestination(destinationId);
+    return rows.map((r) => ({ ...r, destinationId }));
+  }
+
   async findPinsByDestination(destinationId: string) {
     return this.prisma.attraction.findMany({
       where: {

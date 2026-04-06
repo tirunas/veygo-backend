@@ -18,10 +18,10 @@ const hotelInside = { id: 'hotel-arts', lat: 41.3866, lng: 2.1967 };
 describe('GeoMatchingService', () => {
   let service: GeoMatchingService;
   let prisma: {
-    destination: { findMany: jest.Mock };
-    attraction: { findMany: jest.Mock };
-    restaurant: { findMany: jest.Mock };
-    hotel: { findMany: jest.Mock };
+    destination: { findMany: jest.Mock; findUnique: jest.Mock };
+    attraction: { findMany: jest.Mock; findUnique: jest.Mock };
+    restaurant: { findMany: jest.Mock; findUnique: jest.Mock };
+    hotel: { findMany: jest.Mock; findUnique: jest.Mock };
     destinationAttraction: { deleteMany: jest.Mock; createMany: jest.Mock };
     destinationRestaurant: { deleteMany: jest.Mock; createMany: jest.Mock };
     destinationHotel: { deleteMany: jest.Mock; createMany: jest.Mock };
@@ -29,10 +29,10 @@ describe('GeoMatchingService', () => {
 
   beforeEach(async () => {
     prisma = {
-      destination: { findMany: jest.fn() },
-      attraction: { findMany: jest.fn() },
-      restaurant: { findMany: jest.fn() },
-      hotel: { findMany: jest.fn() },
+      destination: { findMany: jest.fn(), findUnique: jest.fn() },
+      attraction: { findMany: jest.fn(), findUnique: jest.fn() },
+      restaurant: { findMany: jest.fn(), findUnique: jest.fn() },
+      hotel: { findMany: jest.fn(), findUnique: jest.fn() },
       destinationAttraction: { deleteMany: jest.fn(), createMany: jest.fn() },
       destinationRestaurant: { deleteMany: jest.fn(), createMany: jest.fn() },
       destinationHotel: { deleteMany: jest.fn(), createMany: jest.fn() },
@@ -50,7 +50,7 @@ describe('GeoMatchingService', () => {
 
   describe('recomputeForDestination', () => {
     it('creates junction rows only for POIs within radius', async () => {
-      prisma.destination.findMany.mockResolvedValue([mockDestination]);
+      prisma.destination.findUnique.mockResolvedValue(mockDestination);
       prisma.attraction.findMany.mockResolvedValue([attractionInside, attractionOutside]);
       prisma.restaurant.findMany.mockResolvedValue([restaurantInside]);
       prisma.hotel.findMany.mockResolvedValue([hotelInside]);
@@ -76,9 +76,12 @@ describe('GeoMatchingService', () => {
     });
 
     it('skips recompute if destination has no coordinates', async () => {
-      prisma.destination.findMany.mockResolvedValue([
-        { id: 'no-coords', lat: null, lng: null, radiusKm: 25 },
-      ]);
+      prisma.destination.findUnique.mockResolvedValue({
+        id: 'no-coords',
+        lat: null,
+        lng: null,
+        radiusKm: 25,
+      });
 
       await service.recomputeForDestination('no-coords');
 
@@ -88,10 +91,16 @@ describe('GeoMatchingService', () => {
 
   describe('recomputeAll', () => {
     it('calls recomputeForDestination for each destination', async () => {
-      prisma.destination.findMany.mockResolvedValue([
-        mockDestination,
-        { id: 'lisbon', lat: 38.7169, lng: -9.1395, radiusKm: 20 },
-      ]);
+      const barcelona = mockDestination;
+      const lisbon = { id: 'lisbon', lat: 38.7169, lng: -9.1395, radiusKm: 20 };
+
+      prisma.destination.findMany.mockResolvedValue([barcelona, lisbon]);
+      prisma.destination.findUnique.mockImplementation((args) => {
+        const id = args.where.id;
+        if (id === 'barcelona') return Promise.resolve(barcelona);
+        if (id === 'lisbon') return Promise.resolve(lisbon);
+        return Promise.resolve(null);
+      });
       prisma.attraction.findMany.mockResolvedValue([]);
       prisma.restaurant.findMany.mockResolvedValue([]);
       prisma.hotel.findMany.mockResolvedValue([]);

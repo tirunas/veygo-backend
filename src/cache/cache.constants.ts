@@ -4,13 +4,6 @@ export const DEST_LIST_TTL = 300;
 export const DEST_CONTENT_KEY = (id: string): string => `dest:${id}:content`;
 export const DEST_CONTENT_TTL = 21600;
 
-export const DEST_ATTRACTIONS_KEY = (id: string): string =>
-  `dest:${id}:attractions`;
-export const DEST_ATTRACTIONS_TTL = 604800;
-
-export const DEST_FOOD_KEY = (id: string): string => `dest:${id}:food-spots`;
-export const DEST_FOOD_TTL = 604800;
-
 export const DEST_MAP_KEY = (id: string): string => `dest:${id}:map-data`;
 export const DEST_MAP_TTL = 604800;
 

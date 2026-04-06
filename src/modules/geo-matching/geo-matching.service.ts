@@ -9,12 +9,11 @@ export class GeoMatchingService {
   constructor(private readonly prisma: PrismaService) {}
 
   async recomputeForDestination(destinationId: string): Promise<void> {
-    const destinations = await this.prisma.destination.findMany({
+    const dest = await this.prisma.destination.findUnique({
       where: { id: destinationId },
       select: { id: true, lat: true, lng: true, radiusKm: true },
     });
 
-    const dest = destinations[0];
     if (!dest || dest.lat == null || dest.lng == null) {
       this.logger.warn(`Skipping geo-match for ${destinationId}: no coordinates`);
       return;
@@ -64,13 +63,13 @@ export class GeoMatchingService {
   }
 
   async recomputeForAttraction(attractionId: string): Promise<void> {
-    const attraction = await this.prisma.attraction.findMany({
+    const attraction = await this.prisma.attraction.findUnique({
       where: { id: attractionId },
       select: { id: true, lat: true, lng: true },
     });
-    if (!attraction[0]) return;
+    if (!attraction) return;
     await this.recomputeForPOI(
-      attraction[0],
+      attraction,
       attractionId,
       'destinationAttraction',
       'attractionId',
@@ -78,13 +77,13 @@ export class GeoMatchingService {
   }
 
   async recomputeForRestaurant(restaurantId: string): Promise<void> {
-    const restaurant = await this.prisma.restaurant.findMany({
+    const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: restaurantId },
       select: { id: true, lat: true, lng: true },
     });
-    if (!restaurant[0]) return;
+    if (!restaurant) return;
     await this.recomputeForPOI(
-      restaurant[0],
+      restaurant,
       restaurantId,
       'destinationRestaurant',
       'restaurantId',
@@ -92,12 +91,12 @@ export class GeoMatchingService {
   }
 
   async recomputeForHotel(hotelId: string): Promise<void> {
-    const hotel = await this.prisma.hotel.findMany({
+    const hotel = await this.prisma.hotel.findUnique({
       where: { id: hotelId },
       select: { id: true, lat: true, lng: true },
     });
-    if (!hotel[0]) return;
-    await this.recomputeForPOI(hotel[0], hotelId, 'destinationHotel', 'hotelId');
+    if (!hotel) return;
+    await this.recomputeForPOI(hotel, hotelId, 'destinationHotel', 'hotelId');
   }
 
   private async recomputeForPOI(

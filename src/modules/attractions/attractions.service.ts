@@ -38,7 +38,7 @@ export class AttractionsService extends PoiServiceBase<Attraction> {
     const content = (r.content as any) ?? {};
     return {
       id: r.id,
-      destinationId: r.destinationId ?? '',
+      destinationId: r.destinationId,
       name: r.name,
       description: r.description,
       priceAndDuration: r.priceAndDuration,

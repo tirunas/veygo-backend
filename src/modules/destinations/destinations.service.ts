@@ -92,11 +92,8 @@ export class DestinationsService {
 
 
   toSummary(record: DestinationRecord): DestinationSummary {
-    const { content, createdAt, updatedAt, ...summary } = record;
-    void content;
-    void createdAt;
-    void updatedAt;
-    return summary;
+    const { content: _content, createdAt: _createdAt, updatedAt: _updatedAt, ...summary } = record;
+    return summary as DestinationSummary;
   }
 
   async search(dto: SearchDestinationsDto): Promise<DestinationSearchResult[]> {
