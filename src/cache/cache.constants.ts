@@ -35,3 +35,17 @@ export const POI_RESTAURANTS_TTL = 604800;
 export const POI_HOTELS_KEY = (destinationId: string): string =>
   `poi:${destinationId}:hotels`;
 export const POI_HOTELS_TTL = 604800;
+
+export const ITINERARY_KEY = (id: string): string => `itinerary:${id}`;
+export const ITINERARY_TTL = 3600;
+
+export const READY_PLANS_LIST_KEY = 'ready-plans:list';
+export const READY_PLAN_KEY = (id: string): string => `ready-plan:${id}`;
+export const READY_PLAN_TTL = 3600;
+
+export const EXPERIENCES_LIST_KEY = 'experiences:list';
+export const EXPERIENCE_KEY = (id: string): string => `experience:${id}`;
+export const EXPERIENCE_TTL = 604800;
+
+export const TESTIMONIALS_LIST_KEY = 'testimonials:list';
+export const TESTIMONIALS_TTL = 86400;
