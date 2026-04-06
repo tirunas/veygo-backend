@@ -6,6 +6,10 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 describe('AppModule - Winston Logger Configuration', () => {
   let module: TestingModule;
 
+  beforeAll(() => {
+    process.env.NODE_ENV = 'test';
+  });
+
   beforeEach(async () => {
     module = await Test.createTestingModule({
       imports: [AppModule],
