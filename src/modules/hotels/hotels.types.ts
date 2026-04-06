@@ -15,8 +15,6 @@ export interface Hotel {
   pricePerNight: number;
   rating: string;
   img: string;
-  lat: number;
-  lng: number;
   source?: string | null;
   highlights?: string[];
   amenities?: string[];

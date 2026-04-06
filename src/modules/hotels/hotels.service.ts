@@ -92,8 +92,6 @@ export class HotelsService {
       pricePerNight: r.pricePerNight,
       rating: r.rating,
       img: r.img,
-      lat: r.lat,
-      lng: r.lng,
       source: r.source,
       highlights: content.highlights,
       amenities: content.amenities,
