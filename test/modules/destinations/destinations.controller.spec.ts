@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { DestinationsController } from '../../../src/modules/destinations/destinations.controller';
 import { DestinationsService } from '../../../src/modules/destinations/destinations.service';
+import { DestinationDetailService } from '../../../src/modules/destinations/destination-detail.service';
 import {
   DestinationSummary,
   DestinationRecord,
@@ -28,6 +29,7 @@ const mockRecord: DestinationRecord = {
 describe('DestinationsController', () => {
   let controller: DestinationsController;
   let mockService: jest.Mocked<DestinationsService>;
+  let mockDetailService: jest.Mocked<DestinationDetailService>;
 
   beforeEach(async () => {
     mockService = {
@@ -39,9 +41,19 @@ describe('DestinationsController', () => {
       toSummary: jest.fn(),
     } as unknown as jest.Mocked<DestinationsService>;
 
+    mockDetailService = {
+      findAttractions: jest.fn(),
+      findFoodSpots: jest.fn(),
+      findMapData: jest.fn(),
+      getDetail: jest.fn(),
+    } as unknown as jest.Mocked<DestinationDetailService>;
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DestinationsController],
-      providers: [{ provide: DestinationsService, useValue: mockService }],
+      providers: [
+        { provide: DestinationsService, useValue: mockService },
+        { provide: DestinationDetailService, useValue: mockDetailService },
+      ],
     }).compile();
 
     controller = module.get<DestinationsController>(DestinationsController);

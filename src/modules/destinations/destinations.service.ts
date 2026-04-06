@@ -6,9 +6,6 @@ import {
   DestinationSummary,
   CreateDestinationInput,
   UpdateDestinationInput,
-  AttractionPin,
-  FoodSpotPin,
-  MapData,
   DestinationSearchResult,
 } from './destinations.types';
 import { SearchDestinationsDto } from './dto/search-destinations.dto';
@@ -17,27 +14,17 @@ import {
   DEST_LIST_TTL,
   DEST_CONTENT_KEY,
   DEST_CONTENT_TTL,
-  DEST_ATTRACTIONS_KEY,
-  DEST_ATTRACTIONS_TTL,
-  DEST_FOOD_KEY,
-  DEST_FOOD_TTL,
-  DEST_MAP_KEY,
-  DEST_MAP_TTL,
   POI_ATTRACTIONS_KEY,
   POI_RESTAURANTS_KEY,
   POI_HOTELS_KEY,
 } from '../../cache/cache.constants';
 import { GeoMatchingService } from '../geo-matching/geo-matching.service';
-import { AttractionsService } from '../attractions/attractions.service';
-import { RestaurantsService } from '../restaurants/restaurants.service';
 
 @Injectable()
 export class DestinationsService {
   constructor(
     private readonly destinationsRepository: DestinationsRepository,
     private readonly geoMatchingService: GeoMatchingService,
-    private readonly attractionsService: AttractionsService,
-    private readonly restaurantsService: RestaurantsService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -103,48 +90,6 @@ export class DestinationsService {
     await this.cacheManager.del(DEST_CONTENT_KEY(id));
   }
 
-  async findAttractions(id: string) {
-    const attractions = await this.attractionsService.findByDestination(id);
-    return { destinationId: id, attractions, totalCount: attractions.length };
-  }
-
-  async findFoodSpots(id: string) {
-    const foodSpots = await this.restaurantsService.findByDestination(id);
-    return { destinationId: id, foodSpots };
-  }
-
-  async findMapData(id: string): Promise<MapData | null> {
-    const destination = await this.findByIdOrThrow(id);
-    const [attractionPins, restaurantPins] = await Promise.all([
-      this.attractionsService.findPinsByDestination(id),
-      this.restaurantsService.findPinsByDestination(id),
-    ]);
-
-    const attractions = attractionPins.map((pin) => ({
-      name: pin.name,
-      description: '',
-      lat: pin.location.lat,
-      lng: pin.location.lng,
-      category: pin.category,
-    }));
-
-    const foodSpots = restaurantPins.map((pin) => ({
-      name: pin.name,
-      description: '',
-      lat: pin.location.lat,
-      lng: pin.location.lng,
-      cuisine: pin.type,
-      priceRange: pin.price,
-    }));
-
-    return {
-      centerLat: destination.lat || 0,
-      centerLng: destination.lng || 0,
-      zoom: 12,
-      attractions,
-      foodSpots,
-    };
-  }
 
   toSummary(record: DestinationRecord): DestinationSummary {
     const { content, createdAt, updatedAt, ...summary } = record;

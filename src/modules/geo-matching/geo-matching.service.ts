@@ -69,24 +69,12 @@ export class GeoMatchingService {
       select: { id: true, lat: true, lng: true },
     });
     if (!attraction[0]) return;
-
-    const destinations = await this.prisma.destination.findMany({
-      select: { id: true, lat: true, lng: true, radiusKm: true },
-    });
-
-    await this.prisma.destinationAttraction.deleteMany({ where: { attractionId } });
-
-    const matches = destinations.filter(
-      (d) =>
-        d.lat != null &&
-        d.lng != null &&
-        haversineDistanceKm(d.lat, d.lng, attraction[0].lat, attraction[0].lng) <= d.radiusKm,
+    await this.recomputeForPOI(
+      attraction[0],
+      attractionId,
+      'destinationAttraction',
+      'attractionId',
     );
-
-    await this.prisma.destinationAttraction.createMany({
-      data: matches.map((d) => ({ destinationId: d.id, attractionId })),
-      skipDuplicates: true,
-    });
   }
 
   async recomputeForRestaurant(restaurantId: string): Promise<void> {
@@ -95,24 +83,12 @@ export class GeoMatchingService {
       select: { id: true, lat: true, lng: true },
     });
     if (!restaurant[0]) return;
-
-    const destinations = await this.prisma.destination.findMany({
-      select: { id: true, lat: true, lng: true, radiusKm: true },
-    });
-
-    await this.prisma.destinationRestaurant.deleteMany({ where: { restaurantId } });
-
-    const matches = destinations.filter(
-      (d) =>
-        d.lat != null &&
-        d.lng != null &&
-        haversineDistanceKm(d.lat, d.lng, restaurant[0].lat, restaurant[0].lng) <= d.radiusKm,
+    await this.recomputeForPOI(
+      restaurant[0],
+      restaurantId,
+      'destinationRestaurant',
+      'restaurantId',
     );
-
-    await this.prisma.destinationRestaurant.createMany({
-      data: matches.map((d) => ({ destinationId: d.id, restaurantId })),
-      skipDuplicates: true,
-    });
   }
 
   async recomputeForHotel(hotelId: string): Promise<void> {
@@ -121,22 +97,35 @@ export class GeoMatchingService {
       select: { id: true, lat: true, lng: true },
     });
     if (!hotel[0]) return;
+    await this.recomputeForPOI(hotel[0], hotelId, 'destinationHotel', 'hotelId');
+  }
 
+  private async recomputeForPOI(
+    poi: { lat: number; lng: number },
+    poiId: string,
+    junctionModel: 'destinationAttraction' | 'destinationRestaurant' | 'destinationHotel',
+    poiIdField: 'attractionId' | 'restaurantId' | 'hotelId',
+  ): Promise<void> {
     const destinations = await this.prisma.destination.findMany({
       select: { id: true, lat: true, lng: true, radiusKm: true },
     });
 
-    await this.prisma.destinationHotel.deleteMany({ where: { hotelId } });
+    await (this.prisma[junctionModel] as any).deleteMany({
+      where: { [poiIdField]: poiId },
+    });
 
     const matches = destinations.filter(
       (d) =>
         d.lat != null &&
         d.lng != null &&
-        haversineDistanceKm(d.lat, d.lng, hotel[0].lat, hotel[0].lng) <= d.radiusKm,
+        haversineDistanceKm(d.lat, d.lng, poi.lat, poi.lng) <= d.radiusKm,
     );
 
-    await this.prisma.destinationHotel.createMany({
-      data: matches.map((d) => ({ destinationId: d.id, hotelId })),
+    await (this.prisma[junctionModel] as any).createMany({
+      data: matches.map((d) => ({
+        destinationId: d.id,
+        [poiIdField]: poiId,
+      })),
       skipDuplicates: true,
     });
   }
