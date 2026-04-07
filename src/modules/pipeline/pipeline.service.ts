@@ -80,7 +80,8 @@ export class PipelineService {
 
       const destLat = destination.lat ?? null;
       const destLng = destination.lng ?? null;
-      const radiusKm = (destination as any).radiusKm ?? 10;
+      // Cap at 8km — Overpass times out on large-radius queries in dense cities
+      const radiusKm = Math.min((destination as any).radiusKm ?? 10, 8);
 
       if (destLat && destLng) {
         this.addLog(jobId, `Discovering via Overpass (${destLat},${destLng} r=${radiusKm}km)`);
