@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { ConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommonModule } from './common/common.module';
@@ -20,6 +21,7 @@ import { ItinerariesModule } from './modules/itineraries/itineraries.module';
 import { ReadyPlansModule } from './modules/ready-plans/ready-plans.module';
 import { ExperiencesModule } from './modules/experiences/experiences.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
+import { PipelineModule } from './modules/pipeline/pipeline.module';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
@@ -70,6 +72,7 @@ import * as winston from 'winston';
     ReadyPlansModule,
     ExperiencesModule,
     TestimonialsModule,
+    PipelineModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -82,6 +85,9 @@ import * as winston from 'winston';
       }),
     }),
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}
