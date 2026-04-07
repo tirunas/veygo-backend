@@ -31,9 +31,19 @@ export class PipelineController {
     return this.service.listJobs();
   }
 
+  @Get('jobs/:jobId')
+  async getJob(@Param('jobId') jobId: string) {
+    return this.service.getJob(jobId);
+  }
+
   @Get('jobs/:jobId/items')
   async listItems(@Param('jobId') jobId: string) {
     return this.service.listItems(jobId);
+  }
+
+  @Get('jobs/:jobId/logs')
+  async getJobLogs(@Param('jobId') jobId: string) {
+    return { logs: this.service.getJobLogs(jobId) };
   }
 
   @Patch('items/:itemId/approve')
@@ -51,6 +61,11 @@ export class PipelineController {
   @Patch('items/:itemId')
   async updateItem(@Param('itemId') itemId: string, @Body() dto: UpdateItemDto) {
     return this.service.updateItem(itemId, dto);
+  }
+
+  @Post('items/:itemId/re-enrich')
+  async reEnrichItem(@Param('itemId') itemId: string) {
+    return this.service.reEnrichItem(itemId);
   }
 
   @Patch('jobs/:jobId/retry')

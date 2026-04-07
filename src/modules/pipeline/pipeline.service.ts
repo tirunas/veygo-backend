@@ -88,7 +88,7 @@ export class PipelineService {
 
         candidates = osmPlaces
           .filter((p) => !existingNames.has(p.name.toLowerCase().trim()))
-          .slice(0, 30);
+          .slice(0, 10);
 
         this.addLog(jobId, `Overpass: ${osmPlaces.length} found, ${candidates.length} new after dedup`);
       } else {
@@ -170,7 +170,7 @@ export class PipelineService {
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         try {
-          this.addLog(jobId, `[${i + 1}/${items.length}] Enriching: ${item.name}`);
+          this.addLog(jobId, `── ${item.name} (${i + 1}/${items.length}) ───────────`);
           const wiki = await this.wikiStep.fetchWikiData(item.name);
           const research = await this.researchStep.research(
             item.name,
@@ -268,6 +268,42 @@ export class PipelineService {
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async reEnrichItem(itemId: string): Promise<PipelineItemRecord> {
+    const item = await this.repository.findItemById(itemId);
+    if (!item) throw new NotFoundException(`Pipeline item ${itemId} not found`);
+
+    const job = await this.repository.findJobById(item.jobId);
+    if (!job) throw new NotFoundException(`Pipeline job ${item.jobId} not found`);
+
+    const destination = await this.destinationsService.findByIdOrThrow(job.destinationId);
+    const type = job.type as 'attraction' | 'restaurant';
+
+    const logFn = (msg: string) => this.addLog(job.id, msg);
+    this.addLog(job.id, `── Re-enriching: ${item.name} ───────────`);
+
+    const wiki = await this.wikiStep.fetchWikiData(item.name);
+    const research = await this.researchStep.research(
+      item.name,
+      destination.name,
+      job.id,
+      logFn,
+      wiki.descriptionEn,
+      wiki.photos,
+    );
+
+    const enrichment = await this.aiEnrichStep.enrich(research, type, item.address);
+    const category = enrichment.category || item.category;
+    await this.repository.updateItemEnrichment(item.id, { ...enrichment, category: category ?? '' });
+
+    if (wiki.photos.length) {
+      await this.repository.updateItemMedia(item.id, { photos: wiki.photos, youtubeLinks: [], instagramLinks: [] });
+    }
+
+    this.addLog(job.id, `  ✓ Re-enriched — uniqueness: ${enrichment.uniquenessScore}/10`);
+    const updated = await this.repository.findItemById(itemId);
+    return updated!;
   }
 
   async listJobs(): Promise<PipelineJobRecord[]> {
