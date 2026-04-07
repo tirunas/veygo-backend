@@ -6,54 +6,20 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
-enum PlanStatus {
-  DRAFT
-  PAID
-  COMPLETE
-}
-
-enum PaymentProvider {
-  MONTONIO
-  STRIPE
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-  REFUNDED
-}
-
-enum AttractionCategory {
-  popular
-  gem
-}
-
-enum HotelTier {
-  budget
-  mid
-  comfort
-}
-
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  passwordHash  String
-  role          Role           @default(USER)
-  loginAttempts Int            @default(0)
-  lockedUntil   DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  refreshTokens RefreshToken[]
-  userPlans     UserPlan[]
-  purchases     Purchase[]
-  auditLogs     AuditLog[]
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  passwordHash       String
+  role               Role                @default(USER)
+  loginAttempts      Int                 @default(0)
+  lockedUntil        DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  auditLogs          AuditLog[]
+  purchases          Purchase[]
   readyPlanPurchases ReadyPlanPurchase[]
+  refreshTokens      RefreshToken[]
+  userPlans          UserPlan[]
 
   @@index([email])
 }
@@ -61,12 +27,12 @@ model User {
 model RefreshToken {
   id        String    @id @default(uuid())
   userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokenHash String
   family    String
   expiresAt DateTime
   revokedAt DateTime?
   createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([tokenHash])
@@ -76,13 +42,13 @@ model RefreshToken {
 model UserPlan {
   id            String     @id @default(uuid())
   userId        String
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   destinationId String
   status        PlanStatus @default(DRAFT)
   customData    Json       @default("{}")
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   purchases     Purchase[]
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([destinationId])
@@ -91,9 +57,7 @@ model UserPlan {
 model Purchase {
   id          String          @id @default(uuid())
   userId      String
-  user        User            @relation(fields: [userId], references: [id])
   userPlanId  String
-  userPlan    UserPlan        @relation(fields: [userPlanId], references: [id])
   provider    PaymentProvider
   providerRef String
   amount      Int
@@ -101,6 +65,8 @@ model Purchase {
   status      PaymentStatus   @default(PENDING)
   paidAt      DateTime?
   createdAt   DateTime        @default(now())
+  user        User            @relation(fields: [userId], references: [id])
+  userPlan    UserPlan        @relation(fields: [userPlanId], references: [id])
 
   @@index([userId])
   @@index([providerRef])
@@ -109,12 +75,12 @@ model Purchase {
 model AuditLog {
   id        String   @id @default(uuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
   event     String
   ip        String
   userAgent String
   meta      Json     @default("{}")
   createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([event])
@@ -122,31 +88,30 @@ model AuditLog {
 }
 
 model Destination {
-  id             String   @id
-  name           String
-  country        String
-  styles         String[]
-  bestSeason     String
-  imgUrl         String
-  heroImageUrl   String
-  currentWeather String   @default("")
-  content        Json
-  lat            Float?
-  lng            Float?
-  radiusKm       Float    @default(25)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
+  id                     String                  @id
+  name                   String
+  country                String
+  styles                 String[]
+  bestSeason             String
+  imgUrl                 String
+  heroImageUrl           String
+  currentWeather         String                  @default("")
+  content                Json
+  lat                    Float?
+  lng                    Float?
+  radiusKm               Float                   @default(25)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
   destinationAttractions DestinationAttraction[]
-  destinationRestaurants DestinationRestaurant[]
   destinationHotels      DestinationHotel[]
-  itinerarySegments     ItinerarySegment[]
+  destinationRestaurants DestinationRestaurant[]
+  itinerarySegments      ItinerarySegment[]
 
   @@index([name])
 }
 
 model Attraction {
-  id               String             @id
+  id               String                  @id
   name             String
   lat              Float
   lng              Float
@@ -157,17 +122,16 @@ model Attraction {
   openingHours     String?
   bestTime         String?
   source           String?
-  content          Json               @default("{}")
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-
-  destinations DestinationAttraction[]
+  content          Json                    @default("{}")
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  destinations     DestinationAttraction[]
 
   @@index([lat, lng])
 }
 
 model Restaurant {
-  id           String   @id
+  id           String                  @id
   name         String
   lat          Float
   lng          Float
@@ -175,21 +139,20 @@ model Restaurant {
   cuisine      String?
   price        String
   openingHours String?
-  delivery     Boolean  @default(false)
-  petFriendly  Boolean  @default(false)
+  delivery     Boolean                 @default(false)
+  petFriendly  Boolean                 @default(false)
   img          String?
   source       String?
-  content      Json     @default("{}")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  content      Json                    @default("{}")
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
   destinations DestinationRestaurant[]
 
   @@index([lat, lng])
 }
 
 model Hotel {
-  id            String    @id
+  id            String             @id
   name          String
   lat           Float
   lng           Float
@@ -199,11 +162,10 @@ model Hotel {
   rating        String
   img           String
   source        String?
-  content       Json      @default("{}")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  destinations DestinationHotel[]
+  content       Json               @default("{}")
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  destinations  DestinationHotel[]
 
   @@index([lat, lng])
 }
@@ -211,8 +173,8 @@ model Hotel {
 model DestinationAttraction {
   destinationId String
   attractionId  String
-  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
   attraction    Attraction  @relation(fields: [attractionId], references: [id], onDelete: Cascade)
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
   @@id([destinationId, attractionId])
   @@index([destinationId])
@@ -246,10 +208,10 @@ model Itinerary {
   title     String?
   days      Json               @default("[]")
   costs     Json               @default("{}")
-  segments  ItinerarySegment[]
-  readyPlan ReadyPlan?
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+  segments  ItinerarySegment[]
+  readyPlan ReadyPlan?
 }
 
 model ItinerarySegment {
@@ -259,8 +221,8 @@ model ItinerarySegment {
   order         Int
   days          Json        @default("[]")
   costs         Json        @default("{}")
-  itinerary     Itinerary   @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
   destination   Destination @relation(fields: [destinationId], references: [id])
+  itinerary     Itinerary   @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
 
   @@index([itineraryId])
   @@index([destinationId])
@@ -276,20 +238,20 @@ model ReadyPlan {
   badge       String?
   tags        String[]
   isPublished Boolean             @default(false)
-  itinerary   Itinerary           @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
-  purchases   ReadyPlanPurchase[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+  itinerary   Itinerary           @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  purchases   ReadyPlanPurchase[]
 }
 
 model ReadyPlanPurchase {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   readyPlanId String
   amount      Int
-  purchasedAt DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+  purchasedAt DateTime  @default(now())
   readyPlan   ReadyPlan @relation(fields: [readyPlanId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([readyPlanId])
@@ -321,4 +283,79 @@ model Testimonial {
   tripDate        String?
   highlight       String?
   savedAmount     String?
+}
+
+model PipelineJob {
+  id            String         @id @default(cuid())
+  destinationId String
+  type          String
+  status        String         @default("pending")
+  errorMessage  String?
+  itemCount     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  items         PipelineItem[]
+
+  @@index([destinationId])
+  @@index([status])
+}
+
+model PipelineItem {
+  id             String      @id @default(cuid())
+  jobId          String
+  job            PipelineJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  status         String      @default("pending")
+  googlePlaceId  String?
+  name           String
+  address        String?
+  lat            Float?
+  lng            Float?
+  rating         Float?
+  openingHours   String?
+  photos         String[]
+  nameLt         String?
+  descriptionLt  String?
+  wowFacts       String[]
+  hook           String?
+  youtubeLinks   String[]
+  instagramLinks String[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([jobId])
+  @@index([status])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PlanStatus {
+  DRAFT
+  PAID
+  COMPLETE
+}
+
+enum PaymentProvider {
+  MONTONIO
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum AttractionCategory {
+  popular
+  gem
+}
+
+enum HotelTier {
+  budget
+  mid
+  comfort
 }
