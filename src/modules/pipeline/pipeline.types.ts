@@ -38,8 +38,20 @@ export interface PipelineItemRecord {
   descriptionLt: string | null;
   wowFacts: string[];
   hook: string | null;
+  category: string | null;
+  ticketInfo: string | null;
+  bestTimeToVisit: string | null;
+  travellerTips: string[];
+  officialWebsite: string | null;
+  bookingUrls: string[];
   youtubeLinks: string[];
   instagramLinks: string[];
+  howToGetThere: string | null;
+  bestPhotoSpot: string | null;
+  insiderTip: string | null;
+  hiddenNearby: string | null;
+  avoidIfYou: string | null;
+  uniquenessScore: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
