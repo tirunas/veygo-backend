@@ -4,10 +4,11 @@ import { PipelineService } from './pipeline.service';
 import { PipelineController } from './pipeline.controller';
 import { PipelineRepository } from './pipeline.repository';
 import { PipelineCronJob } from './pipeline-cron.job';
+import { OverpassStep } from './steps/overpass.step';
 import { WebSearchStep } from './steps/web-search.step';
-import { PlacesStep } from './steps/places.step';
 import { AiEnrichStep } from './steps/ai-enrich.step';
-import { MediaStep } from './steps/media.step';
+import { WikiStep } from './steps/wiki.step';
+import { ResearchStep } from './steps/research.step';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { AttractionsModule } from '../attractions/attractions.module';
 import { RestaurantsModule } from '../restaurants/restaurants.module';
@@ -25,10 +26,11 @@ import { DestinationsModule } from '../destinations/destinations.module';
     PipelineRepository,
     PipelineService,
     PipelineCronJob,
+    OverpassStep,
     WebSearchStep,
-    PlacesStep,
     AiEnrichStep,
-    MediaStep,
+    WikiStep,
+    ResearchStep,
   ],
   controllers: [PipelineController],
   exports: [PipelineService],

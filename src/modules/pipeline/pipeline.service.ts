@@ -13,7 +13,7 @@ import {
 import { AttractionsService } from '../attractions/attractions.service';
 import { RestaurantsService } from '../restaurants/restaurants.service';
 import { DestinationsService } from '../destinations/destinations.service';
-import { ForumInsightsStep } from './steps/forum-insights.step';
+import { ResearchStep } from './steps/research.step';
 import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
@@ -39,7 +39,7 @@ export class PipelineService {
     private readonly webSearchStep: WebSearchStep,
     private readonly aiEnrichStep: AiEnrichStep,
     private readonly wikiStep: WikiStep,
-    private readonly forumInsightsStep: ForumInsightsStep,
+    private readonly researchStep: ResearchStep,
     private readonly attractionsService: AttractionsService,
     private readonly restaurantsService: RestaurantsService,
     private readonly destinationsService: DestinationsService,
@@ -171,18 +171,20 @@ export class PipelineService {
         const item = items[i];
         try {
           this.addLog(jobId, `[${i + 1}/${items.length}] Enriching: ${item.name}`);
-          const [wiki, forumInsights] = await Promise.all([
-            this.wikiStep.fetchWikiData(item.name),
-            this.forumInsightsStep.getInsights(item.name, destination.name),
-          ]);
+          const wiki = await this.wikiStep.fetchWikiData(item.name);
+          const research = await this.researchStep.research(
+            item.name,
+            destination.name,
+            jobId,
+            (msg) => this.addLog(jobId, msg),
+            wiki.descriptionEn,
+            wiki.photos,
+          );
 
           const enrichment = await this.aiEnrichStep.enrich(
-            item.name,
-            item.address,
+            research,
             type,
-            wiki.descriptionEn,
-            destination.name,
-            forumInsights,
+            item.address,
           );
 
           // Preserve OSM category if AI didn't assign a better one
