@@ -106,6 +106,7 @@ model Destination {
   destinationHotels      DestinationHotel[]
   destinationRestaurants DestinationRestaurant[]
   itinerarySegments      ItinerarySegment[]
+  pipelineJobs           PipelineJob[]
 
   @@index([name])
 }
@@ -294,10 +295,12 @@ model PipelineJob {
   itemCount     Int            @default(0)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  destination   Destination    @relation(fields: [destinationId], references: [id], onDelete: Cascade)
   items         PipelineItem[]
 
   @@index([destinationId])
   @@index([status])
+  @@index([destinationId, type])
 }
 
 model PipelineItem {
