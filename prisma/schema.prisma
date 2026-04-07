@@ -295,8 +295,8 @@ model PipelineJob {
   itemCount     Int            @default(0)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  destination   Destination    @relation(fields: [destinationId], references: [id], onDelete: Cascade)
   items         PipelineItem[]
+  destination   Destination    @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
   @@index([destinationId])
   @@index([status])
@@ -304,26 +304,38 @@ model PipelineJob {
 }
 
 model PipelineItem {
-  id             String      @id @default(cuid())
-  jobId          String
-  job            PipelineJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  status         String      @default("pending")
-  googlePlaceId  String?
-  name           String
-  address        String?
-  lat            Float?
-  lng            Float?
-  rating         Float?
-  openingHours   String?
-  photos         String[]
-  nameLt         String?
-  descriptionLt  String?
-  wowFacts       String[]
-  hook           String?
-  youtubeLinks   String[]
-  instagramLinks String[]
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  id              String      @id @default(cuid())
+  jobId           String
+  status          String      @default("pending")
+  googlePlaceId   String?
+  name            String
+  address         String?
+  lat             Float?
+  lng             Float?
+  rating          Float?
+  openingHours    String?
+  photos          String[]
+  nameLt          String?
+  descriptionLt   String?
+  wowFacts        String[]
+  hook            String?
+  youtubeLinks    String[]
+  instagramLinks  String[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  bestTimeToVisit String?
+  bookingUrls     String[]
+  category        String?
+  officialWebsite String?
+  ticketInfo      String?
+  travellerTips   String[]
+  howToGetThere   String?
+  bestPhotoSpot   String?
+  insiderTip      String?
+  hiddenNearby    String?
+  avoidIfYou      String?
+  uniquenessScore Int?
+  job             PipelineJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@index([jobId])
   @@index([status])
