@@ -93,6 +93,9 @@ export class OverpassStep {
         }
 
         data = await response.json() as OverpassResponse;
+        if (data.remark) {
+          this.logger.warn(`Overpass remark: ${data.remark}`);
+        }
         break;
       } catch (error) {
         this.logger.warn(`Overpass mirror ${mirror} failed: ${String(error)}, trying next`);
@@ -104,22 +107,25 @@ export class OverpassStep {
       return [];
     }
 
+    if (data.remark?.includes('timed out') || data.remark?.includes('timeout')) {
+      this.logger.warn(`Overpass query timed out — remark: ${data.remark}`);
+      return [];
+    }
+
     const places = this.parseElements(data.elements ?? [], type);
     this.logger.log(`Overpass: ${places.length} ${type}s within ${radiusKm}km`);
     return places;
   }
 
   private buildAttractionQuery(lat: number, lng: number, radiusM: number): string {
-    // Use nwr (node/way/relation) so major landmarks like Sagrada Família (ways) are included.
-    // Whitelist specific tourism values to exclude hotels/hostels/apartments.
-    // NOTE: Do NOT use [maxsize:...] — it silently returns 0 elements when exceeded.
+    // Single sub-query on tourism tag only — keeps query light enough for dense cities.
+    // nwr needed because major landmarks (Sagrada Família etc.) are ways/relations, not nodes.
     const tourismValues = 'museum|attraction|artwork|gallery|viewpoint|monument|castle|ruins|zoo|aquarium|theme_park|garden|beach|lighthouse|memorial';
-    const historicValues = 'castle|monument|memorial|ruins|monastery|church|cathedral|archaeological_site|fort|palace|city_gate';
-    return `[out:json][timeout:90];(nwr["tourism"~"${tourismValues}"](around:${radiusM},${lat},${lng});nwr["historic"~"${historicValues}"](around:${radiusM},${lat},${lng});nwr["leisure"~"park|garden|beach|nature_reserve"](around:${radiusM},${lat},${lng});nwr["amenity"~"place_of_worship|theatre|cinema"](around:${radiusM},${lat},${lng}););out center 100;`;
+    return `[out:json][timeout:60];nwr["tourism"~"${tourismValues}"](around:${radiusM},${lat},${lng});out center 100;`;
   }
 
   private buildRestaurantQuery(lat: number, lng: number, radiusM: number): string {
-    return `[out:json][timeout:90];(nwr["amenity"~"restaurant|cafe|bar|pub"](around:${radiusM},${lat},${lng}););out center 100;`;
+    return `[out:json][timeout:60];nwr["amenity"~"restaurant|cafe|bar|pub"](around:${radiusM},${lat},${lng});out center 100;`;
   }
 
   private static readonly ACCOMMODATION_PATTERN = /\b(hotel|hostel|motel|pension|pensión|hostal|aparthotel|inn|lodge|resort|suites?|b&b|bed and breakfast|guesthouse|guest house|apartaments?|airbnb)\b/i;
@@ -144,8 +150,8 @@ export class OverpassStep {
       if (seen.has(key)) continue;
       seen.add(key);
 
-      const lat = (el.type === 'way' || el.type === 'relation') ? el.center?.lat : el.lat;
-      const lng = (el.type === 'way' || el.type === 'relation') ? el.center?.lon : el.lon;
+      const lat = el.lat ?? el.center?.lat;
+      const lng = el.lon ?? el.center?.lon; // ways/relations use center
       if (!lat || !lng) continue;
 
       const osmCategory = this.extractCategory(el.tags, type);
@@ -238,6 +244,7 @@ export class OverpassStep {
 
 interface OverpassResponse {
   elements?: OverpassElement[];
+  remark?: string;
 }
 
 interface OverpassElement {

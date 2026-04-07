@@ -76,6 +76,9 @@ export class AiEnrichStep {
       ? `\nResearch gathered from ${researchParts.length} sources:\n\n${researchParts.join('\n\n')}`
       : '\nNo external research available — use your knowledge of this specific place.';
 
+    const knownOfficialWebsite = bundle.officialWebsite ?? null;
+    const knownBookingUrls = bundle.bookingUrls ?? [];
+
     if (address) researchParts.unshift(`Address: ${address}`);
 
     const prompt = `You are a seasoned traveler who has visited ${placeName} in ${destinationName} multiple times and read everything the internet has to say about it.
@@ -110,8 +113,8 @@ Return ONLY valid JSON (no markdown, no extra text):
     "Photography or experience tip specific to this exact place",
     "Nearby attraction or combined-visit recommendation with specific name"
   ],
-  "officialWebsite": "Official website URL if you're certain, otherwise null",
-  "bookingUrls": ["Known ticket booking platform URLs for this specific attraction — only if certain"],
+  "officialWebsite": ${knownOfficialWebsite ? `"${knownOfficialWebsite}"` : '"Use ONLY this value: null — do NOT invent a URL"'},
+  "bookingUrls": ${knownBookingUrls.length > 0 ? JSON.stringify(knownBookingUrls) : '[] /* leave empty — do NOT invent booking URLs */'},
   "uniquenessScore": 7
 }
 
@@ -125,8 +128,14 @@ For uniquenessScore: rate 1-10 how unique/special this place is vs standard tour
     });
 
     const text = response.choices[0]?.message?.content ?? '';
-    const jsonText = text.trim().replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+    // Extract JSON from potential markdown code fences or surrounding prose
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) ?? text.match(/(\{[\s\S]*\})/);
+    const jsonText = jsonMatch ? jsonMatch[1].trim() : text.trim();
     const parsed = JSON.parse(jsonText) as AiEnrichment;
+
+    // Always use researched URLs — never trust AI-generated ones
+    if (knownOfficialWebsite) parsed.officialWebsite = knownOfficialWebsite;
+    if (knownBookingUrls.length > 0) parsed.bookingUrls = knownBookingUrls;
 
     parsed.wowFacts = Array.isArray(parsed.wowFacts) ? parsed.wowFacts : [];
     parsed.travellerTips = Array.isArray(parsed.travellerTips) ? parsed.travellerTips : [];

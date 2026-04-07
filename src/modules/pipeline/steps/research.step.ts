@@ -14,6 +14,8 @@ export interface ResearchBundle {
   wikiDescription: string | null;
   wikiPhotos: string[];
   flickrPhotos: string[];
+  officialWebsite: string | null;
+  bookingUrls: string[];
 }
 
 const USER_AGENT = 'VeygoBot/1.0 (travel planning app)';
@@ -31,15 +33,16 @@ export class ResearchStep {
     wikiDescription: string | null,
     wikiPhotos: string[],
   ): Promise<ResearchBundle> {
-    logFn(`  → Reddit, Atlas Obscura, Wikivoyage, YouTube, blogs, Flickr: parallel fetch...`);
+    logFn(`  → Reddit, Atlas Obscura, Wikivoyage, YouTube, blogs, Flickr, official URLs: parallel fetch...`);
 
-    const [reddit, atlasObscura, wikivoyage, youtube, blogs, flickr] = await Promise.allSettled([
+    const [reddit, atlasObscura, wikivoyage, youtube, blogs, flickr, officialData] = await Promise.allSettled([
       this.fetchReddit(placeName, destinationName, logFn),
       this.fetchAtlasObscura(placeName, destinationName, logFn),
       this.fetchWikivoyage(placeName, destinationName, logFn),
       this.fetchYoutube(placeName, destinationName, logFn),
       this.fetchBlogs(placeName, destinationName, logFn),
       this.fetchFlickr(placeName, destinationName, logFn),
+      this.fetchOfficialUrls(placeName, destinationName, logFn),
     ]);
 
     const sources: SourceResult[] = [];
@@ -69,9 +72,12 @@ export class ResearchStep {
       logFn(`  ✗ Flickr: failed (skipped)`);
     }
 
+    const officialWebsite = officialData.status === 'fulfilled' ? officialData.value.officialWebsite : null;
+    const bookingUrls = officialData.status === 'fulfilled' ? officialData.value.bookingUrls : [];
+
     const sourceCount = sources.length;
     const photoCount = flickrPhotos.length + wikiPhotos.length;
-    logFn(`  ✓ Research complete: ${sourceCount} sources, ${photoCount} photos`);
+    logFn(`  ✓ Research complete: ${sourceCount} sources, ${photoCount} photos, official=${officialWebsite ? 'yes' : 'no'}, booking=${bookingUrls.length}`);
 
     return {
       placeName,
@@ -80,6 +86,8 @@ export class ResearchStep {
       wikiDescription,
       wikiPhotos,
       flickrPhotos,
+      officialWebsite,
+      bookingUrls,
     };
   }
 
@@ -391,5 +399,68 @@ export class ResearchStep {
 
     logFn(`  ✓ Flickr: ${photos.length} photos`);
     return { source: 'flickr', snippets: [], photos, reliability: 0.6 };
+  }
+
+  private async fetchOfficialUrls(
+    placeName: string,
+    destinationName: string,
+    logFn: (msg: string) => void,
+  ): Promise<{ officialWebsite: string | null; bookingUrls: string[] }> {
+    logFn(`  → Official site + booking URLs: searching...`);
+
+    // Search DuckDuckGo for the official website
+    const officialQuery = `"${placeName}" ${destinationName} official website tickets`;
+    const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(officialQuery)}&format=json&no_html=1&skip_disambig=1`;
+
+    let officialWebsite: string | null = null;
+    const bookingUrls: string[] = [];
+
+    try {
+      const res = await fetch(ddgUrl, {
+        headers: { 'User-Agent': USER_AGENT },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+      });
+
+      if (res.ok) {
+        const data = await res.json() as {
+          AbstractURL?: string;
+          AbstractSource?: string;
+          RelatedTopics?: Array<{ FirstURL?: string; Text?: string }>;
+        };
+
+        // AbstractURL from DuckDuckGo instant answer is often the official site
+        if (data.AbstractURL && data.AbstractURL.length > 0) {
+          const url = data.AbstractURL;
+          const isBooking = /viator\.com|getyourguide|klook|tiqets|musement|expedia/i.test(url);
+          if (!isBooking && data.AbstractSource !== 'Wikipedia') {
+            officialWebsite = url;
+          }
+        }
+
+        // Look for booking platform links in related topics
+        for (const topic of (data.RelatedTopics ?? []).slice(0, 10)) {
+          const url = topic.FirstURL ?? '';
+          if (/viator\.com\/attractions/i.test(url)) {
+            bookingUrls.push(url);
+          } else if (/getyourguide\.com\/[a-z-]+-l\d+/i.test(url)) {
+            bookingUrls.push(url);
+          } else if (/tiqets\.com/i.test(url)) {
+            bookingUrls.push(url);
+          }
+        }
+      }
+    } catch {
+      // silently skip
+    }
+
+    // Construct known booking search URLs as fallback (search pages, not fake product pages)
+    const encodedPlace = encodeURIComponent(placeName);
+    if (bookingUrls.length === 0) {
+      bookingUrls.push(`https://www.viator.com/search/${encodedPlace}`);
+      bookingUrls.push(`https://www.getyourguide.com/s/?q=${encodedPlace}`);
+    }
+
+    logFn(`  ✓ Official URLs: site=${officialWebsite ? 'found' : 'none'}, booking=${bookingUrls.length}`);
+    return { officialWebsite, bookingUrls };
   }
 }
