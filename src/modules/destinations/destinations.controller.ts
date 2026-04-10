@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, Headers, HttpCode, ForbiddenException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Public } from '../../common/decorators/public.decorator';
 import { DestinationsService } from './destinations.service';
 import { DestinationDetailService } from './destination-detail.service';
@@ -17,6 +18,7 @@ export class DestinationsController {
   constructor(
     private readonly destinationsService: DestinationsService,
     private readonly destinationDetailService: DestinationDetailService,
+    private readonly config: ConfigService,
   ) {}
 
   @Get()
@@ -49,5 +51,17 @@ export class DestinationsController {
   @Get(':id/map-data')
   async findMapData(@Param('id') id: string): Promise<MapData | null> {
     return this.destinationDetailService.findMapData(id);
+  }
+
+  @Post(':id/revalidate')
+  @Public()
+  @HttpCode(204)
+  async revalidateCache(
+    @Param('id') id: string,
+    @Headers('x-directus-secret') secret: string,
+  ): Promise<void> {
+    const expected = this.config.get<string>('DIRECTUS_WEBHOOK_SECRET');
+    if (!expected || secret !== expected) throw new ForbiddenException();
+    await this.destinationsService.invalidateCache(id);
   }
 }

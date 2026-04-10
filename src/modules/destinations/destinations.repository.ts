@@ -13,15 +13,41 @@ export class DestinationsRepository {
   async findAll(): Promise<DestinationRecord[]> {
     const records = await this.prisma.destination.findMany({
       orderBy: { name: 'asc' },
+      include: {
+        styles: {
+          include: { style: true },
+          orderBy: { style: { sortOrder: 'asc' } },
+        },
+      },
     });
-    return records as unknown as DestinationRecord[];
+    return records.map((r) => {
+      const styles = r.styles.map((ds) => ds.style);
+      return { ...r, styles } as unknown as DestinationRecord;
+    });
   }
 
   async findById(id: string): Promise<DestinationRecord | null> {
     const record = await this.prisma.destination.findUnique({
       where: { id },
+      include: {
+        styles: {
+          include: { style: true },
+          orderBy: { style: { sortOrder: 'asc' } },
+        },
+      },
     });
-    return record as unknown as DestinationRecord | null;
+    if (!record) return null;
+    const styles = record.styles.map((ds) => ds.style);
+    return { ...record, styles } as unknown as DestinationRecord;
+  }
+
+  async findPhotosById(id: string): Promise<string[]> {
+    const row = await this.prisma.destination.findUnique({
+      where: { id },
+      select: { photos: true },
+    });
+    const raw = row?.photos;
+    return Array.isArray(raw) ? (raw as string[]) : [];
   }
 
   async create(input: CreateDestinationInput): Promise<DestinationRecord> {
@@ -64,13 +90,22 @@ export class DestinationsRepository {
     }
 
     if (styles?.length) {
-      where.styles = { hasSome: styles };
+      where.styles = { some: { style: { slug: { in: styles } } } };
     }
 
     const records = await this.prisma.destination.findMany({
       where,
       orderBy: { name: 'asc' },
+      include: {
+        styles: {
+          include: { style: true },
+          orderBy: { style: { sortOrder: 'asc' } },
+        },
+      },
     });
-    return records as unknown as DestinationRecord[];
+    return records.map((r) => {
+      const styles = r.styles.map((ds) => ds.style);
+      return { ...r, styles } as unknown as DestinationRecord;
+    });
   }
 }

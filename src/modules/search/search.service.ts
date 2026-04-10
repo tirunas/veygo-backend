@@ -26,7 +26,7 @@ export class SearchService {
 
     if (query.styles && query.styles.length > 0) {
       const hasMatchingStyle = query.styles.some((style) =>
-        destination.styles.includes(style),
+        destination.styles.some((s) => s.slug === style),
       );
       if (!hasMatchingStyle) return false;
     }

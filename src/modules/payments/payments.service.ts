@@ -39,11 +39,11 @@ export class PaymentsService {
     const destination = await this.destinationsService.findByIdOrThrow(
       plan.destinationId,
     );
-    if (!destination.content.startingPrice) {
+    if (!destination.startingPrice) {
       throw new BadRequestException('Destination has no starting price');
     }
 
-    const amountCents = destination.content.startingPrice * CENTS_PER_EURO;
+    const amountCents = destination.startingPrice * CENTS_PER_EURO;
     const orderId = randomUUID();
 
     const purchase = await this.purchasesRepository.create({
@@ -84,11 +84,11 @@ export class PaymentsService {
     const destination = await this.destinationsService.findByIdOrThrow(
       plan.destinationId,
     );
-    if (!destination.content.startingPrice) {
+    if (!destination.startingPrice) {
       throw new BadRequestException('Destination has no starting price');
     }
 
-    const amountCents = destination.content.startingPrice * CENTS_PER_EURO;
+    const amountCents = destination.startingPrice * CENTS_PER_EURO;
     const purchase = await this.purchasesRepository.create({
       userId,
       userPlanId,

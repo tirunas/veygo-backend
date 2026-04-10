@@ -30,8 +30,8 @@ export class PricingService {
     const entry: PriceEntry = {
       destinationId,
       hubCode,
-      startingPrice: destination.content.startingPrice ?? 0,
-      flightHours: destination.content.flightHours ?? 0,
+      startingPrice: destination.startingPrice ?? 0,
+      flightHours: destination.flightHours ?? 0,
       currency: 'EUR',
     };
 

@@ -18,11 +18,13 @@ export const configSchema = Joi.object({
   SMTP_HOST: Joi.string().required(),
   SMTP_PORT: Joi.number().default(1025),
   SMTP_FROM: Joi.string().email().required(),
-  MONTONIO_ACCESS_KEY: Joi.string().required(),
-  MONTONIO_SECRET_KEY: Joi.string().required(),
+  MONTONIO_ACCESS_KEY: Joi.string().allow('').default(''),
+  MONTONIO_SECRET_KEY: Joi.string().allow('').default(''),
   MONTONIO_BASE_URL: Joi.string()
     .uri()
     .default('https://sandbox-merchant.montonio.com'),
-  STRIPE_SECRET_KEY: Joi.string().required(),
-  STRIPE_WEBHOOK_SECRET: Joi.string().required(),
+  STRIPE_SECRET_KEY: Joi.string().allow('').default(''),
+  STRIPE_WEBHOOK_SECRET: Joi.string().allow('').default(''),
+  CACHE_FLUSH_SECRET: Joi.string().allow('').default(''),
+  DIRECTUS_URL: Joi.string().uri().default('http://localhost:8155'),
 });

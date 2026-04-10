@@ -38,19 +38,11 @@ export class HotelsRepository extends PoiRepositoryBase {
   }
 
   async create(input: CreateHotelInput) {
-    const { destinationId: _destinationId, content, ...data } = input;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return this.prisma.hotel.create({
-      data: { ...data, content: (content ?? {}) as any },
-    });
+    const { destinationId: _destinationId, ...data } = input as CreateHotelInput & { destinationId?: string };
+    return this.prisma.hotel.create({ data: data as any });
   }
 
   async update(id: string, input: UpdateHotelInput) {
-    const { content, ...data } = input;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return this.prisma.hotel.update({
-      where: { id },
-      data: content !== undefined ? { ...data, content: content as any } : data,
-    });
+    return this.prisma.hotel.update({ where: { id }, data: input as any });
   }
 }

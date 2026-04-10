@@ -7,6 +7,7 @@ import {
   POI_HOTELS_KEY,
   POI_HOTELS_TTL,
 } from '../../cache/cache.constants';
+import { resolveImageUrl } from '../../common/utils/directus-asset';
 import type {
   Hotel,
   HotelPin,
@@ -34,22 +35,20 @@ export class HotelsService extends PoiServiceBase<Hotel> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected toEntity(r: any): Hotel {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const content = (r.content as any) ?? {};
     return {
-      id: r.id,
-      name: r.name,
-      location: { lat: r.lat, lng: r.lng },
-      tier: r.tier,
-      area: r.area,
-      pricePerNight: r.pricePerNight,
-      rating: r.rating,
-      img: r.img,
-      source: r.source,
-      highlights: content.highlights,
-      amenities: content.amenities,
-      walkTo: content.walkTo,
-      roomTypes: content.roomTypes,
+      id: r.id as string,
+      name: r.name as string,
+      location: { lat: r.lat as number, lng: r.lng as number },
+      tier: r.tier as 'budget' | 'mid' | 'comfort',
+      area: r.area as string,
+      pricePerNight: r.pricePerNight as number,
+      rating: r.rating as string,
+      img: resolveImageUrl((r.imgFileId as string | null) ?? (r.img as string)),
+      highlights: (r.highlights as string[]) ?? [],
+      amenities: (r.amenities as string[]) ?? [],
+      roomTypes: (r.roomTypes as string[]) ?? [],
+      walkTo: (r.walkTo as Record<string, string>) ?? {},
+      source: (r.source as string | null) ?? null,
     };
   }
 

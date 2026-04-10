@@ -340,10 +340,7 @@ export class PipelineService {
         lat: item.lat ?? 0,
         lng: item.lng ?? 0,
         openingHours: item.openingHours ?? undefined,
-        content: {
-          hook: item.hook ?? undefined,
-          photos: [...item.photos, ...item.instagramLinks],
-        },
+        hook: item.hook ?? undefined,
       });
     } else {
       await this.restaurantsService.create({

@@ -8,6 +8,7 @@ import {
   UpdateDestinationInput,
   DestinationSearchResult,
 } from './destinations.types';
+import { PhotosService } from '../photos/photos.service';
 import { SearchDestinationsDto } from './dto/search-destinations.dto';
 import {
   DEST_LIST_KEY,
@@ -19,12 +20,14 @@ import {
   POI_HOTELS_KEY,
 } from '../../cache/cache.constants';
 import { GeoMatchingService } from '../geo-matching/geo-matching.service';
+import { resolveImageUrl } from '../../common/utils/directus-asset';
 
 @Injectable()
 export class DestinationsService {
   constructor(
     private readonly destinationsRepository: DestinationsRepository,
     private readonly geoMatchingService: GeoMatchingService,
+    private readonly photosService: PhotosService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -47,12 +50,27 @@ export class DestinationsService {
 
     const record = await this.destinationsRepository.findById(id);
     if (!record) throw new NotFoundException(`Destination ${id} not found`);
+    const [uploadedPhotos, rawPhotoIds] = await Promise.all([
+      this.photosService.findByEntity('Destination', id),
+      this.destinationsRepository.findPhotosById(id),
+    ]);
+    const photoIds = rawPhotoIds.length > 0 ? rawPhotoIds : (Array.isArray(record.photos) ? record.photos as string[] : []);
+    const photoUrls = uploadedPhotos.length > 0
+      ? uploadedPhotos.map((p) => p.url)
+      : photoIds.map((photoId: string) => resolveImageUrl(photoId));
+    const resolved = {
+      ...record,
+      imgUrl: resolveImageUrl(record.imgFileId ?? record.imgUrl),
+      heroImageUrl: resolveImageUrl(record.heroImageFileId ?? record.heroImageUrl),
+      photos: photoUrls,
+      tagline: record.tagline,
+    };
     await this.cacheManager.set(
       DEST_CONTENT_KEY(id),
-      record,
+      resolved,
       DEST_CONTENT_TTL * 1000,
     );
-    return record;
+    return resolved;
   }
 
   async createDestination(
@@ -90,10 +108,25 @@ export class DestinationsService {
     await this.cacheManager.del(DEST_CONTENT_KEY(id));
   }
 
+  async invalidateCache(id: string): Promise<void> {
+    await Promise.all([
+      this.cacheManager.del(DEST_CONTENT_KEY(id)),
+      this.cacheManager.del(DEST_LIST_KEY),
+    ]);
+  }
 
   toSummary(record: DestinationRecord): DestinationSummary {
-    const { content: _content, createdAt: _createdAt, updatedAt: _updatedAt, ...summary } = record;
-    return summary as DestinationSummary;
+    return {
+      id: record.id,
+      name: record.name,
+      country: record.country,
+      tagline: record.tagline,
+      styles: record.styles,
+      bestSeason: record.bestSeason,
+      imgUrl: resolveImageUrl(record.imgFileId ?? record.imgUrl),
+      heroImageUrl: resolveImageUrl(record.heroImageFileId ?? record.heroImageUrl),
+      currentWeather: record.currentWeather,
+    };
   }
 
   async search(dto: SearchDestinationsDto): Promise<DestinationSearchResult[]> {
@@ -104,22 +137,20 @@ export class DestinationsService {
 
     if (dto.maxBudget !== undefined) {
       records = records.filter(
-        (r) => (r.content.minDailyBudget ?? 0) <= dto.maxBudget!,
+        (r) => (r.minDailyBudget ?? 0) <= dto.maxBudget!,
       );
     }
 
     if (dto.maxFlightH !== undefined) {
       records = records.filter(
-        (r) => (r.content.flightHours ?? 0) <= dto.maxFlightH!,
+        (r) => (r.flightHours ?? 0) <= dto.maxFlightH!,
       );
     }
 
     if (months?.length) {
       records = records.filter((r) => {
-        const weatherData = (r.content as any).weather as
-          | Array<{ month: string; quality: string }>
-          | undefined;
-        if (!weatherData) return false;
+        const weatherData = r.weatherData;
+        if (!weatherData?.length) return false;
         return weatherData.some(
           (w) => months.includes(w.month) && w.quality === 'best',
         );
@@ -146,12 +177,12 @@ export class DestinationsService {
       country: record.country,
       styles: record.styles,
       bestSeason: record.bestSeason,
-      imgUrl: record.imgUrl,
-      heroImageUrl: record.heroImageUrl,
+      imgUrl: resolveImageUrl(record.imgFileId ?? record.imgUrl),
+      heroImageUrl: resolveImageUrl(record.heroImageFileId ?? record.heroImageUrl),
       currentWeather: record.currentWeather,
-      minDailyBudget: record.content.minDailyBudget ?? 0,
-      flightHours: record.content.flightHours ?? 0,
-      startingPrice: record.content.startingPrice ?? 0,
+      minDailyBudget: record.minDailyBudget,
+      flightHours: record.flightHours,
+      startingPrice: record.startingPrice,
     };
   }
 }

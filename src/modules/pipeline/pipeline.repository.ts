@@ -87,7 +87,7 @@ export class PipelineRepository {
 
   async updateItemEnrichment(
     itemId: string,
-    enrichment: Pick<PipelineItemRecord, 'nameLt' | 'descriptionLt' | 'wowFacts' | 'hook'>,
+    enrichment: Pick<PipelineItemRecord, 'nameLt' | 'descriptionLt' | 'wowFacts' | 'hook' | 'category'>,
   ): Promise<void> {
     await this.prisma.pipelineItem.update({
       where: { id: itemId },
@@ -97,7 +97,7 @@ export class PipelineRepository {
 
   async updateItemMedia(
     itemId: string,
-    media: Pick<PipelineItemRecord, 'youtubeLinks' | 'instagramLinks'>,
+    media: Pick<PipelineItemRecord, 'photos' | 'youtubeLinks' | 'instagramLinks'>,
   ): Promise<void> {
     await this.prisma.pipelineItem.update({
       where: { id: itemId },

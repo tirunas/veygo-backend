@@ -91,12 +91,26 @@ model Destination {
   id                     String                  @id
   name                   String
   country                String
-  styles                 String[]
-  bestSeason             String
-  imgUrl                 String
-  heroImageUrl           String
+  tagline                String                  @default("")
+  bestSeason             String?
+  imgUrl                 String                  @default("")
+  heroImageUrl           String                  @default("")
+  imgFileId              String?    @db.Uuid
+  heroImageFileId        String?    @db.Uuid
   currentWeather         String                  @default("")
-  content                Json
+  description            String                  @default("")
+  highlights             Json                    @default("[]")
+  flightHours            Int?
+  minDailyBudget         Int?
+  startingPrice          Int?
+  soldCount              Int                     @default(0)
+  weatherData            Json                    @default("[]")
+  whyData                Json                    @default("[]")
+  compareData            Json                    @default("{}")
+  tipsHtml               String?
+  emergencyData          Json                    @default("{}")
+  tagsData               Json                    @default("[]")
+  photos                 Json                    @default("[]")
   lat                    Float?
   lng                    Float?
   radiusKm               Float                   @default(25)
@@ -107,26 +121,30 @@ model Destination {
   destinationRestaurants DestinationRestaurant[]
   itinerarySegments      ItinerarySegment[]
   pipelineJobs           PipelineJob[]
+  styles                 DestinationStyle[]
 
   @@index([name])
 }
 
 model Attraction {
-  id               String                  @id
-  name             String
-  lat              Float
-  lng              Float
-  category         AttractionCategory
-  description      String
-  img              String
-  priceAndDuration String?
-  openingHours     String?
-  bestTime         String?
-  source           String?
-  content          Json                    @default("{}")
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
-  destinations     DestinationAttraction[]
+  id                 String                  @id
+  name               String
+  lat                Float
+  lng                Float
+  category           AttractionCategory
+  description        String
+  img                String
+  imgFileId          String?    @db.Uuid
+  hook               String?
+  tip                String?
+  nearbyFoodRadiusKm Float                   @default(1.0)
+  priceAndDuration   String?
+  openingHours       String?
+  bestTime           String?
+  source             String?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  destinations       DestinationAttraction[]
 
   @@index([lat, lng])
 }
@@ -139,12 +157,15 @@ model Restaurant {
   type         String
   cuisine      String?
   price        String
+  description  String?
+  signature    String?
+  reviews      Json                    @default("[]")
   openingHours String?
   delivery     Boolean                 @default(false)
   petFriendly  Boolean                 @default(false)
   img          String?
+  imgFileId    String?    @db.Uuid
   source       String?
-  content      Json                    @default("{}")
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
   destinations DestinationRestaurant[]
@@ -162,8 +183,12 @@ model Hotel {
   pricePerNight Int
   rating        String
   img           String
+  imgFileId     String?    @db.Uuid
+  highlights    Json               @default("[]")
+  amenities     Json               @default("[]")
+  roomTypes     Json               @default("[]")
+  walkTo        Json               @default("{}")
   source        String?
-  content       Json               @default("{}")
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
   destinations  DestinationHotel[]
@@ -341,6 +366,24 @@ model PipelineItem {
   @@index([status])
 }
 
+model Style {
+  id           String             @id @default(uuid())
+  slug         String             @unique
+  labelLt      String
+  icon         String?
+  sortOrder    Int                @default(0)
+  destinations DestinationStyle[]
+}
+
+model DestinationStyle {
+  destinationId String
+  styleId       String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  style         Style       @relation(fields: [styleId], references: [id], onDelete: Cascade)
+
+  @@id([destinationId, styleId])
+}
+
 enum Role {
   USER
   ADMIN
@@ -373,4 +416,19 @@ enum HotelTier {
   budget
   mid
   comfort
+}
+
+model Photo {
+  id         String   @id @default(uuid())
+  url        String
+  filename   String
+  entityType String
+  entityId   String
+  isPrimary  Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  alt        String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId, sortOrder])
+  @@index([entityType, entityId, isPrimary])
 }

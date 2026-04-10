@@ -1,0 +1,22 @@
+{
+  "name": "directus-extension-interface-crop-image",
+  "version": "1.0.0",
+  "type": "module",
+  "directus:extension": {
+    "type": "interface",
+    "path": "index.js",
+    "source": "src/index.ts",
+    "host": "^11.0.0"
+  },
+  "scripts": {
+    "build": "directus-extension build"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "^11.0.0",
+    "typescript": "^5.0.0",
+    "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "cropperjs": "^1.6.2"
+  }
+}

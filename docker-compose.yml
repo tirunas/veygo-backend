@@ -24,7 +24,7 @@ services:
       POSTGRES_PASSWORD: veygo_dev
       POSTGRES_DB: veygo
     ports:
-      - '5433:5432'
+      - '5534:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -37,7 +37,7 @@ services:
     image: redis:7-alpine
     command: redis-server --appendonly yes
     ports:
-      - '6379:6379'
+      - '6480:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -55,6 +55,36 @@ services:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
+  directus:
+    image: directus/directus:11
+    ports:
+      - '8155:8055'
+    environment:
+      SECRET: 'veygo-directus-secret-dev'
+      DB_CLIENT: 'pg'
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: veygo
+      DB_USER: veygo
+      DB_PASSWORD: veygo_dev
+      ADMIN_EMAIL: admin@veygo.dev
+      ADMIN_PASSWORD: veygo_admin_dev
+      PUBLIC_URL: 'http://localhost:8155'
+      WEBSOCKETS_ENABLED: 'false'
+      CORS_ENABLED: 'true'
+      CORS_ORIGIN: 'true'
+      SESSION_COOKIE_SECURE: 'false'
+      SESSION_COOKIE_SAME_SITE: 'lax'
+      ASSETS_TRANSFORM_IMAGE_MAX_DIMENSION: '4096'
+      ASSETS_ALLOW_TRANSFORMATIONS: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - directus_uploads:/directus/uploads
+      - ./directus-extensions:/directus/extensions
+
 volumes:
   postgres_data:
   redis_data:
+  directus_uploads:

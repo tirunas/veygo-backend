@@ -36,19 +36,11 @@ export class AttractionsRepository extends PoiRepositoryBase {
   }
 
   async create(input: CreateAttractionInput) {
-    const { destinationId: _destinationId, content, ...data } = input;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return this.prisma.attraction.create({
-      data: { ...data, content: (content ?? {}) as any },
-    });
+    const { destinationId: _destinationId, ...data } = input;
+    return this.prisma.attraction.create({ data });
   }
 
   async update(id: string, input: UpdateAttractionInput) {
-    const { content, ...data } = input;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return this.prisma.attraction.update({
-      where: { id },
-      data: content !== undefined ? { ...data, content: content as any } : data,
-    });
+    return this.prisma.attraction.update({ where: { id }, data: input });
   }
 }

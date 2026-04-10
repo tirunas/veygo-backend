@@ -1,11 +1,9 @@
-export interface AttractionContent {
-  hook?: string;
-  tip?: string;
-  tickets?: unknown;
-  crowd?: unknown[];
-  photos?: string[];
-  nearbyFood?: { name: string; type: string; distance: string }[];
-  [key: string]: unknown;
+export interface NearbyFood {
+  id: string;
+  name: string;
+  type: string;
+  price: string;
+  distance: number;
 }
 
 export interface Attraction {
@@ -13,22 +11,19 @@ export interface Attraction {
   destinationId: string;
   name: string;
   description: string;
-  priceAndDuration: string;
+  priceAndDuration: string | null;
   img: string;
   category: 'popular' | 'gem';
   lat: number;
   lng: number;
-  openingHours?: string | null;
-  bestTime?: string | null;
-  source?: string | null;
-  content: AttractionContent;
+  hook: string | null;
+  tip: string | null;
+  nearbyFoodRadiusKm: number;
+  openingHours: string | null;
+  bestTime: string | null;
+  source: string | null;
   location: { lat: number; lng: number };
-  hook?: string;
-  tip?: string;
-  tickets?: unknown;
-  crowd?: unknown[];
-  photos?: string[];
-  nearbyFood?: { name: string; type: string; distance: string }[];
+  nearbyFood: NearbyFood[];
 }
 
 export interface AttractionPin {
@@ -44,27 +39,31 @@ export interface CreateAttractionInput {
   destinationId: string;
   name: string;
   description: string;
-  priceAndDuration: string;
   img: string;
   category: 'popular' | 'gem';
   lat: number;
   lng: number;
+  hook?: string;
+  tip?: string;
+  nearbyFoodRadiusKm?: number;
+  priceAndDuration?: string;
   openingHours?: string;
   bestTime?: string;
   source?: string;
-  content?: AttractionContent;
 }
 
 export interface UpdateAttractionInput {
   name?: string;
   description?: string;
-  priceAndDuration?: string;
   img?: string;
   category?: 'popular' | 'gem';
   lat?: number;
   lng?: number;
+  hook?: string;
+  tip?: string;
+  nearbyFoodRadiusKm?: number;
+  priceAndDuration?: string;
   openingHours?: string;
   bestTime?: string;
   source?: string;
-  content?: AttractionContent;
 }

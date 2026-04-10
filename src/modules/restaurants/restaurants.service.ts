@@ -7,9 +7,11 @@ import {
   POI_RESTAURANTS_KEY,
   POI_RESTAURANTS_TTL,
 } from '../../cache/cache.constants';
+import { resolveImageUrl } from '../../common/utils/directus-asset';
 import type {
   Restaurant,
   RestaurantPin,
+  Review,
   CreateRestaurantInput,
   UpdateRestaurantInput,
 } from './restaurants.types';
@@ -34,25 +36,23 @@ export class RestaurantsService extends PoiServiceBase<Restaurant> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected toEntity(r: any): Restaurant {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const content = (r.content as any) ?? {};
     return {
-      id: r.id,
-      name: r.name,
-      description: r.description,
-      price: r.price,
-      type: r.type,
-      img: r.img,
-      lat: r.lat,
-      lng: r.lng,
-      openingHours: r.openingHours,
-      delivery: r.delivery,
-      deliveryUrl: r.deliveryUrl,
-      petFriendly: r.petFriendly,
-      source: r.source,
-      location: { lat: r.lat, lng: r.lng },
-      signature: content.signature,
-      reviews: content.reviews,
+      id: r.id as string,
+      name: r.name as string,
+      description: (r.description as string | null) ?? null,
+      price: r.price as string,
+      type: r.type as string,
+      cuisine: (r.cuisine as string | null) ?? null,
+      img: resolveImageUrl((r.imgFileId as string | null) ?? (r.img as string | null) ?? '') || null,
+      lat: r.lat as number,
+      lng: r.lng as number,
+      openingHours: (r.openingHours as string | null) ?? null,
+      delivery: (r.delivery as boolean) ?? false,
+      petFriendly: (r.petFriendly as boolean) ?? false,
+      signature: (r.signature as string | null) ?? null,
+      reviews: (r.reviews as Review[]) ?? [],
+      source: (r.source as string | null) ?? null,
+      location: { lat: r.lat as number, lng: r.lng as number },
     };
   }
 

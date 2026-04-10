@@ -30,11 +30,11 @@ export class PlansService {
       destinationId: destination.id,
       destinationName: destination.name,
       country: destination.country,
-      itinerary: destination.content.itinerary ?? [],
-      attractions: destination.content.attractions,
-      foodSpots: destination.content.foodSpots,
-      startingPrice: destination.content.startingPrice,
-      flightHours: destination.content.flightHours,
+      itinerary: [],
+      attractions: [],
+      foodSpots: [],
+      startingPrice: destination.startingPrice ?? undefined,
+      flightHours: destination.flightHours ?? undefined,
     };
 
     await this.cacheManager.set(cacheKey, basePlan, PLAN_TTL * 1000);

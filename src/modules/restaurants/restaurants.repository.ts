@@ -31,24 +31,11 @@ export class RestaurantsRepository extends PoiRepositoryBase {
   }
 
   async create(input: CreateRestaurantInput) {
-    const { destinationId: _destinationId, signature, reviews, ...data } = input;
-    const content = { signature, reviews };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return this.prisma.restaurant.create({
-      data: { ...data, content: content as any },
-    });
+    const { destinationId: _destinationId, ...data } = input as CreateRestaurantInput & { destinationId?: string };
+    return this.prisma.restaurant.create({ data: data as any });
   }
 
   async update(id: string, input: UpdateRestaurantInput) {
-    const { signature, reviews, ...data } = input;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const updates: any = { ...data };
-    if (signature !== undefined || reviews !== undefined) {
-      updates.content = { signature, reviews };
-    }
-    return this.prisma.restaurant.update({
-      where: { id },
-      data: updates,
-    });
+    return this.prisma.restaurant.update({ where: { id }, data: input as any });
   }
 }

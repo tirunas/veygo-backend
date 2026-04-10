@@ -1,11 +1,3 @@
-export interface HotelContent {
-  highlights?: string[];
-  amenities?: string[];
-  walkTo?: Record<string, string>;
-  roomTypes?: string[];
-  [key: string]: unknown;
-}
-
 export interface Hotel {
   id: string;
   name: string;
@@ -15,11 +7,11 @@ export interface Hotel {
   pricePerNight: number;
   rating: string;
   img: string;
-  source?: string | null;
-  highlights?: string[];
-  amenities?: string[];
-  walkTo?: Record<string, string>;
-  roomTypes?: string[];
+  highlights: string[];
+  amenities: string[];
+  roomTypes: string[];
+  walkTo: Record<string, string>;
+  source: string | null;
 }
 
 export interface HotelPin {
@@ -32,7 +24,6 @@ export interface HotelPin {
 
 export interface CreateHotelInput {
   id: string;
-  destinationId?: string; // ignored by repository
   name: string;
   tier: 'budget' | 'mid' | 'comfort';
   area: string;
@@ -41,8 +32,11 @@ export interface CreateHotelInput {
   img: string;
   lat: number;
   lng: number;
+  highlights?: string[];
+  amenities?: string[];
+  roomTypes?: string[];
+  walkTo?: Record<string, string>;
   source?: string;
-  content?: HotelContent;
 }
 
 export interface UpdateHotelInput {
@@ -54,6 +48,9 @@ export interface UpdateHotelInput {
   img?: string;
   lat?: number;
   lng?: number;
+  highlights?: string[];
+  amenities?: string[];
+  roomTypes?: string[];
+  walkTo?: Record<string, string>;
   source?: string;
-  content?: HotelContent;
 }

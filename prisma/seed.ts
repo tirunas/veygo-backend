@@ -1977,15 +1977,56 @@ async function main() {
   });
   console.log('✅ Admin user seeded: admin@veygo.dev / Admin123!');
 
+  console.log('Seeding styles...');
+  const styles = [
+    { slug: 'adventure', labelLt: 'Nuotykiai', icon: 'compass', sortOrder: 0 },
+    { slug: 'culture',   labelLt: 'Kultūra',   icon: 'landmark', sortOrder: 1 },
+    { slug: 'beach',     labelLt: 'Paplūdimys', icon: 'waves',   sortOrder: 2 },
+    { slug: 'food',      labelLt: 'Maistas',    icon: 'utensils', sortOrder: 3 },
+    { slug: 'nature',    labelLt: 'Gamta',      icon: 'mountain', sortOrder: 4 },
+    { slug: 'city',      labelLt: 'Miestai',    icon: 'building2', sortOrder: 5 },
+    { slug: 'romance',   labelLt: 'Romantika',  icon: 'heart',   sortOrder: 6 },
+    { slug: 'family',    labelLt: 'Šeima',      icon: 'users',   sortOrder: 7 },
+    { slug: 'luxury',    labelLt: 'Prabanga',   icon: 'star',    sortOrder: 8 },
+  ];
+  for (const style of styles) {
+    await prisma.style.upsert({
+      where: { slug: style.slug },
+      update: {},
+      create: style,
+    });
+  }
+  console.log(`  ✓ ${styles.length} styles seeded`);
+
   console.log('Seeding destinations...');
   for (const destination of destinations) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { styles: _destinationStyles, ...destinationData } = destination as typeof destination & { styles?: string[] };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await prisma.destination.upsert({
       where: { id: destination.id },
-      update: destination,
-      create: destination,
+      update: destinationData as any,
+      create: destinationData as any,
     });
     console.log(`  ✓ ${destination.name}`);
   }
+
+  // Migrate existing destination styles from JSON arrays to DestinationStyle junction rows
+  console.log('\nMigrating destination styles...');
+  for (const destination of destinations) {
+    const destWithStyles = destination as typeof destination & { styles?: string[] };
+    if (!destWithStyles.styles?.length) continue;
+    for (const styleSlug of destWithStyles.styles) {
+      const style = await prisma.style.findUnique({ where: { slug: styleSlug } });
+      if (!style) continue;
+      await prisma.destinationStyle.upsert({
+        where: { destinationId_styleId: { destinationId: destination.id, styleId: style.id } },
+        update: {},
+        create: { destinationId: destination.id, styleId: style.id },
+      });
+    }
+  }
+  console.log('  ✓ Destination styles migrated');
 
   console.log('\nSeeding attractions...');
   for (const attraction of attractions) {

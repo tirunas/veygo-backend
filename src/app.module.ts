@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { ConfigModule } from './config/config.module';
@@ -22,12 +24,19 @@ import { ReadyPlansModule } from './modules/ready-plans/ready-plans.module';
 import { ExperiencesModule } from './modules/experiences/experiences.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { PipelineModule } from './modules/pipeline/pipeline.module';
+import { PhotosModule } from './modules/photos/photos.module';
+import { StylesModule } from './modules/styles/styles.module';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+      serveStaticOptions: { index: false },
+    }),
     ConfigModule,
     WinstonModule.forRootAsync({
       inject: [ConfigService],
@@ -73,6 +82,8 @@ import * as winston from 'winston';
     ExperiencesModule,
     TestimonialsModule,
     PipelineModule,
+    PhotosModule,
+    StylesModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

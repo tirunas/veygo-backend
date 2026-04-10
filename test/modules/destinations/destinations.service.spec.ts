@@ -55,9 +55,11 @@ describe('DestinationsService', () => {
       recomputeForDestination: jest.fn(),
     };
 
+    const mockPhotosService = { findByEntity: jest.fn().mockResolvedValue([]) } as any;
     service = new DestinationsService(
       mockRepo,
       mockGeoMatching as any,
+      mockPhotosService,
       mockCache as unknown as import('@nestjs/cache-manager').Cache,
     );
   });

@@ -1,0 +1,16 @@
+{
+  "name": "directus-extension-display-edit-link",
+  "version": "1.0.0",
+  "directus:extension": {
+    "type": "display",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^11.0.0"
+  },
+  "scripts": {
+    "build": "directus-extension build"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "^17.1.2"
+  }
+}

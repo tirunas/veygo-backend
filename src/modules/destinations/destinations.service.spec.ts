@@ -9,6 +9,7 @@ const mockCacheDel = jest.fn().mockResolvedValue(undefined);
 const mockRepo = { search: mockSearch } as any;
 const mockCache = { get: mockCacheGet, set: mockCacheSet, del: mockCacheDel } as any;
 const mockGeoMatching = { recomputeForDestination: jest.fn() } as any;
+const mockPhotosService = { findByEntity: jest.fn().mockResolvedValue([]) } as any;
 
 const makeRecord = (overrides: Partial<DestinationRecord> = {}): DestinationRecord => ({
   id: 'barcelona',
@@ -40,7 +41,7 @@ describe('DestinationsService.search', () => {
     mockCacheGet.mockClear();
     mockCacheSet.mockClear();
     mockCacheDel.mockClear();
-    service = new DestinationsService(mockRepo, mockGeoMatching, mockCache);
+    service = new DestinationsService(mockRepo, mockGeoMatching, mockPhotosService, mockCache);
   });
 
   it('returns all results when no filters provided', async () => {

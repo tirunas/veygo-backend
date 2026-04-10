@@ -16,10 +16,11 @@ export class StripeService {
   private readonly webhookSecret: string;
 
   constructor(private readonly config: ConfigService) {
-    this.stripe = new (Stripe as unknown as new (key: string) => unknown)(
-      this.config.get<string>('STRIPE_SECRET_KEY')!,
-    );
-    this.webhookSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET')!;
+    const stripeKey = this.config.get<string>('STRIPE_SECRET_KEY');
+    this.stripe = stripeKey
+      ? new (Stripe as unknown as new (key: string) => unknown)(stripeKey)
+      : null;
+    this.webhookSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET') ?? '';
   }
 
   async createPaymentIntent(
